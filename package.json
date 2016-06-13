@@ -1,0 +1,27 @@
+{
+  "name": "ho-bobot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "dependencies": {
+    "superagent": "^2.0.0",
+    "ws": "1.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stenverbois/Discord-bot-ES6.git"
+  },
+  "author": "Sten Verbois <stenverbois@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stenverbois/Discord-bot-ES6/issues"
+  },
+  "homepage": "https://github.com/stenverbois/Discord-bot-ES6#readme",
+  "engines": {
+    "node": "6.2.1"
+  }
+}
