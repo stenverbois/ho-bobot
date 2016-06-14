@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stenverbois/Discord-bot-ES6.git"
+    "url": "git+https://github.com/stenverbois/ho-bobot.git"
   },
   "author": "Sten Verbois <stenverbois@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/stenverbois/Discord-bot-ES6/issues"
+    "url": "https://github.com/stenverbois/ho-bobot/issues"
   },
-  "homepage": "https://github.com/stenverbois/Discord-bot-ES6#readme",
+  "homepage": "https://github.com/stenverbois/ho-bobot#readme",
   "engines": {
     "node": "6.2.1"
   }

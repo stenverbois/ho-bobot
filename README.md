@@ -1,1 +1,1 @@
-# Discord-bot-ES6
+# Discord bot Ho-BoBot
