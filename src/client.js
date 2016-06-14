@@ -95,13 +95,13 @@ class Client extends EventEmitter {
             }
             else if (msg.t === 'GUILD_CREATE') {
                 this.servers.add(new Server(msg_data))
-                if(msg_data.name === "Ho-BoBot Testing Grounds") {
-                    let test_str = "Members online: "
-                    this.servers.get("id", msg_data.id).members.all().forEach(member => {
-                        console.log(member.status)
-                        test_str += member.username + ", "
-                    })
-                    console.log(test_str.substring(0, test_str.length - 2))
+                let test_str = "Members online: "
+                this.servers.get("id", msg_data.id).members.all("online", true).forEach(member => {
+                    console.log(member.status)
+                    test_str += member.username + ", "
+                })
+                console.log(test_str.substring(0, test_str.length - 2))
+                if (msg_data.name === "Ho-BoBot Testing Grounds") {
                     let req = request('POST', EndPoints.CHANNEL_MESSAGE(msg_data.id))
                     req.set('User-Agent', {url:"https://github.com/stenverbois/ho-bobot", version: 1})
                        .send({'content': test_str.substring(0, test_str.length - 2)})
@@ -116,11 +116,11 @@ class Client extends EventEmitter {
                 // Log messages
                 fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2))
                 fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n")
-                if(msg_data.game && !this.games[msg_data.nick]) {
+                if (msg_data.game && !this.games[msg_data.nick]) {
                     this.games[msg_data.nick] = msg_data.game.name
                     console.log(`${msg_data.nick} started playing ${msg_data.game.name}`)
                 }
-                else if(!msg_data.game && this.games[msg_data.nick]) {
+                else if (!msg_data.game && this.games[msg_data.nick]) {
                     console.log(`${msg_data.nick} stopped playing.`)
                 }
             }

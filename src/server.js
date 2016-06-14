@@ -25,7 +25,12 @@ class Server {
         })
 
         data.presences.forEach(presence => {
-            this.members.get("id", presence.user.id).status = presence.status
+            let user = this.members.get("id", presence.user.id)
+            user.status = presence.status
+            if (presence.game) {
+                user.game = presence.game
+                console.log("Set game to " + presence.game.name)
+            }
         })
     }
 }
