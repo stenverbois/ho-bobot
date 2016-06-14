@@ -33,7 +33,7 @@ const EndPoints = {
     USER_CONNECTIONS: id => `${BASE}/users/${id}/connections`,
 
     // Invites
-    INVITE: id => `${BASE}/invites/${id}`
+    INVITE: id => `${BASE}/invites/${id}`,
 
     // Voice
     VOICE_REGIONS: () => `${BASE}/voice/regions`

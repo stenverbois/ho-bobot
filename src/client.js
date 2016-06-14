@@ -4,6 +4,9 @@ const request = require('superagent')
 const WebSocket = require('ws')
 
 const User = require('./user')
+const Server = require('./server')
+const Collection = require('./collection')
+const EndPoints = require('./api').EndPoints
 
 module.exports =
 class Client extends EventEmitter {
@@ -15,8 +18,7 @@ class Client extends EventEmitter {
         this.heartbeat =  null
 
         // TEMP
-        this.users = []
-        this.games = {}
+        this.servers = new Collection()
     }
 
     login(token) {
@@ -92,7 +94,22 @@ class Client extends EventEmitter {
                 this.emit('ready')
             }
             else if (msg.t === 'GUILD_CREATE') {
-                msg_data.members.forEach(member => this.users.push(new User(member.user)))
+                this.servers.add(new Server(msg_data))
+                let test_str = "Members online: "
+                this.servers.get(msg_data.id).members.all().forEach(member => {
+                    if(member.status === "online")
+                        test_str += member.username + ", "
+                })
+                console.log(test_str.substring(0, test_str.length - 2))
+                let req = request('POST', EndPoints.CHANNEL_MESSAGE(msg_data.id))
+                req.set('User-Agent', {url:"https://github.com/stenverbois/ho-bobot", version: 1});
+                req.send({'content': test_str.substring(0, test_str.length - 2)})
+                req.set('authorization', this.token)
+                req.then(res => {
+                    console.log(res)
+                })
+                console.log(test_str.substring(0, test_str.length - 2))
+
             }
             else if (msg.t === 'PRESENCE_UPDATE') {
                 // Log messages

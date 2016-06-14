@@ -9,6 +9,8 @@ class User {
         this.email = data.email
         this.nick = this.nick
         this.game = this.game
+
+        this.status = "offline"
     }
 
     equals(other) {
