@@ -25,7 +25,7 @@ class Server {
         })
 
         data.presences.forEach(presence => {
-            this.members.get(presence.user.id).status = presence.status
+            this.members.get("id", presence.user.id).status = presence.status
         })
     }
 }

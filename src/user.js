@@ -18,4 +18,8 @@ class User {
                this.username === other.username &&
                this.discriminator ===  other.discriminator
     }
+
+    get online() {
+        return this.status === "online"
+    }
 }

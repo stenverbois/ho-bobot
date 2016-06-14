@@ -4,19 +4,26 @@ class Collection {
         this.collection = {}
     }
 
-    get(id) {
-        return this.collection[id]
+    get(key, value) {
+        let results = []
+        for(var item in this.collection) {
+            if(this.collection[item][key] === value) {
+                return this.collection[item];
+            }
+        }
+    }
+
+    all(key, value) {
+        let results = []
+        for(var item in this.collection) {
+            if(key === 'undefined' || this.collection[item][key] === value) {
+                results.push(this.collection[item]);
+            }
+        }
+        return results
     }
 
     add(item) {
         this.collection[item.id] = item
-    }
-
-    all() {
-        let arr = []
-        for(var item in this.collection) {
-            arr.push(this.collection[item]);
-        }
-        return arr
     }
 }

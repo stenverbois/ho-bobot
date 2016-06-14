@@ -95,20 +95,21 @@ class Client extends EventEmitter {
             }
             else if (msg.t === 'GUILD_CREATE') {
                 this.servers.add(new Server(msg_data))
-                let test_str = "Members online: "
-                this.servers.get(msg_data.id).members.all().forEach(member => {
-                    if(member.status === "online")
+                if(msg_data.name === "Ho-BoBot Testing Grounds") {
+                    let test_str = "Members online: "
+                    this.servers.get("id", msg_data.id).members.all().forEach(member => {
+                        console.log(member.status)
                         test_str += member.username + ", "
-                })
-                console.log(test_str.substring(0, test_str.length - 2))
-                let req = request('POST', EndPoints.CHANNEL_MESSAGE(msg_data.id))
-                req.set('User-Agent', {url:"https://github.com/stenverbois/ho-bobot", version: 1});
-                req.send({'content': test_str.substring(0, test_str.length - 2)})
-                req.set('authorization', this.token)
-                req.then(res => {
-                    console.log(res)
-                })
-                console.log(test_str.substring(0, test_str.length - 2))
+                    })
+                    console.log(test_str.substring(0, test_str.length - 2))
+                    let req = request('POST', EndPoints.CHANNEL_MESSAGE(msg_data.id))
+                    req.set('User-Agent', {url:"https://github.com/stenverbois/ho-bobot", version: 1})
+                       .send({'content': test_str.substring(0, test_str.length - 2)})
+                       .set('authorization', this.token)
+                       .then(res => {
+                        // console.log(res)
+                    })
+                }
 
             }
             else if (msg.t === 'PRESENCE_UPDATE') {
