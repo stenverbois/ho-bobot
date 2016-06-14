@@ -1,13 +1,14 @@
+const fs = require('fs')
+const EventEmitter = require('events').EventEmitter;
 const request = require('superagent')
 const WebSocket = require('ws')
 
 const User = require('./user')
 
-const API = "https://discordapp.com/api"
-
 module.exports =
-class Client {
+class Client extends EventEmitter {
     constructor() {
+        super()
         this.token = ''
         this.gateway = ''
         this.websocket = null
@@ -31,8 +32,12 @@ class Client {
         })
     }
 
+    setClientGame(name) {
+        this.websocket.send(JSON.stringify({op: 3, d: {idle_since: null, game: {name: name}}}))
+    }
+
     requestGateWay() {
-        let req = request('GET', `${API}/gateway`)
+        let req = request('GET', 'https://discordapp.com/api/gateway')
         req.set('authorization', this.token)
         return req.then(res => {
             return res.body.url
@@ -78,15 +83,21 @@ class Client {
             const msg = JSON.parse(packet)
             const msg_data = msg.d
 
+
             if (msg.t === 'READY') {
                 this.heartbeat = setInterval(() => {
                     this.websocket.send(JSON.stringify({op: 1, d: 0}))
                 }, msg_data.heartbeat_interval)
+
+                this.emit('ready')
             }
             else if (msg.t === 'GUILD_CREATE') {
                 msg_data.members.forEach(member => this.users.push(new User(member.user)))
             }
             else if (msg.t === 'PRESENCE_UPDATE') {
+                // Log messages
+                fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2))
+                fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n")
                 if(msg_data.game && !this.games[msg_data.nick]) {
                     this.games[msg_data.nick] = msg_data.game.name
                     console.log(`${msg_data.nick} started playing ${msg_data.game.name}`)
@@ -96,6 +107,9 @@ class Client {
                 }
             }
             else {
+                // Log messages
+                fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2))
+                fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n")
                 console.log("Unknown t: " + JSON.stringify(msg.t))
             }
         })
