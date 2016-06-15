@@ -94,7 +94,9 @@ class Client extends EventEmitter {
                 this.emit('ready')
             }
             else if (msg.t === 'GUILD_CREATE') {
-                this.servers.add(new Server(msg_data))
+                let server = new Server(msg_data)
+                this.servers.add(server)
+                this.emit('server-created', server)
                 let test_str = "Members online: "
                 this.servers.get("id", msg_data.id).members.all("online", true).forEach(member => {
                     console.log(member.status)
