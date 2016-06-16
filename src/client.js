@@ -92,6 +92,8 @@ class Client extends EventEmitter {
                 }, msg_data.heartbeat_interval);
 
                 this.emit('ready');
+                fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
+                fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
             }
             else if (msg.t === 'GUILD_CREATE') {
                 let server = new Guild(msg_data);
@@ -118,13 +120,6 @@ class Client extends EventEmitter {
                 // Log messages
                 fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
                 fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
-                if (msg_data.game && !this.games[msg_data.nick]) {
-                    this.games[msg_data.nick] = msg_data.game.name;
-                    console.log(`${msg_data.nick} started playing ${msg_data.game.name}`);
-                }
-                else if (!msg_data.game && this.games[msg_data.nick]) {
-                    console.log(`${msg_data.nick} stopped playing.`);
-                }
             }
             else {
                 // Log messages
