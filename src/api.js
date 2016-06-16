@@ -1,4 +1,4 @@
-const BASE = "https://discordapp.com/api"
+const BASE = "https://discordapp.com/api";
 
 const EndPoints = {
     // Channels
@@ -37,6 +37,6 @@ const EndPoints = {
 
     // Voice
     VOICE_REGIONS: () => `${BASE}/voice/regions`
-}
+};
 
-module.exports = {EndPoints}
+module.exports = {EndPoints};

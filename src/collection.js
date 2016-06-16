@@ -1,11 +1,11 @@
 module.exports =
 class Collection {
     constructor() {
-        this.collection = {}
+        this.collection = {};
     }
 
     get(key, value) {
-        let results = []
+        let results = [];
         for (var item in this.collection) {
             if (this.collection[item][key] === value) {
                 return this.collection[item];
@@ -14,16 +14,16 @@ class Collection {
     }
 
     all(key, value) {
-        let results = []
+        let results = [];
         for (var item in this.collection) {
             if (key === 'undefined' || this.collection[item][key] === value) {
                 results.push(this.collection[item]);
             }
         }
-        return results
+        return results;
     }
 
     add(item) {
-        this.collection[item.id] = item
+        this.collection[item.id] = item;
     }
-}
+};

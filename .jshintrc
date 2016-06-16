@@ -1,0 +1,22 @@
+{
+    "esversion": 6,
+
+    "node"          : true,
+
+    "bitwise"       : true,
+    "boss"          : false,
+    "eqeqeq"        : true,
+    "eqnull"        : false,
+    "evil"          : false,
+    "forin"         : false,
+    "immed"         : true,
+    "latedef"       : true,
+    "loopfunc"      : false,
+    "noarg"         : true,
+    "shadow"        : false,
+    "supernew"      : false,
+    "undef"         : true,
+
+
+    "indent"        : 4
+}
