@@ -8,10 +8,10 @@ client.on('ready', () => {
 client.on('server-created', (server) => {
     if(server.name === "Ho-Bokes") {
         let web_str = 'Members online: ';
-        client.servers.all().forEach(server => {
+        client.guilds.all().forEach(server => {
             console.log("NAME " + server.name);
         });
-        client.servers.get("name", "Ho-Bokes").members.all("online", true).forEach(member => {
+        client.guilds.get("name", "Ho-Bokes").members.all("online", true).forEach(member => {
             web_str += member.username + ", ";
         });
         web_str = web_str.substring(0, web_str.length - 2);

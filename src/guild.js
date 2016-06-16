@@ -2,7 +2,7 @@ const Collection = require('./collection');
 const User = require('./user');
 
 module.exports =
-class Server {
+class Guild {
     constructor(data) {
         this.id = data.id;
         this.name = data.name;

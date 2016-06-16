@@ -11,19 +11,19 @@ const EndPoints = {
     CHANNEL_INVITES: id => `${BASE}/channels/${id}/invites`,
     CHANNEL_TYPING: id => `${BASE}/channels/${id}/typing`,
 
-    // Servers (Guilds)
-    SERVER_CREATE: () => `${BASE}/guilds`,
-    SERVER: id => `${BASE}/guilds/${id}`,
-    SERVER_CHANNELS: id => `${BASE}/guilds/${id}/channels`,
-    SERVER_MEMBERS: (id, user_id="") => `${BASE}/guilds/${id}/members/${user_id}`,
-    SERVER_BANS: (id, user_id="") => `${BASE}/guilds/${id}/bans/${user_id}`,
-    SERVER_ROLES: (id, role_id="") => `${BASE}/guilds/${id}/roles/${role_id}`,
-    SERVER_PRUNE: id => `${BASE}/guilds/${id}/prune`,
-    SERVER_REGIONS: id => `${BASE}/guilds/${id}/regions`,
-    SERVER_INVITES: id => `${BASE}/guilds/${id}/invites`,
-    SERVER_INTEGRATIONS: (id, integration_id="") => `${BASE}/guilds/${id}/integrations/${integration_id}`,
-    SERVER_INTEGRATION_SYNC: (id, integration_id="") => `${BASE}/guilds/${id}/integrations/${integration_id}/sync`,
-    SERVER_EMBED: id => `${BASE}/guilds/${id}/embed`,
+    // Guilds
+    GUILD_CREATE: () => `${BASE}/guilds`,
+    GUILD: id => `${BASE}/guilds/${id}`,
+    GUILD_CHANNELS: id => `${BASE}/guilds/${id}/channels`,
+    GUILD_MEMBERS: (id, user_id="") => `${BASE}/guilds/${id}/members/${user_id}`,
+    GUILD_BANS: (id, user_id="") => `${BASE}/guilds/${id}/bans/${user_id}`,
+    GUILD_ROLES: (id, role_id="") => `${BASE}/guilds/${id}/roles/${role_id}`,
+    GUILD_PRUNE: id => `${BASE}/guilds/${id}/prune`,
+    GUILD_REGIONS: id => `${BASE}/guilds/${id}/regions`,
+    GUILD_INVITES: id => `${BASE}/guilds/${id}/invites`,
+    GUILD_INTEGRATIONS: (id, integration_id="") => `${BASE}/guilds/${id}/integrations/${integration_id}`,
+    GUILD_INTEGRATION_SYNC: (id, integration_id="") => `${BASE}/guilds/${id}/integrations/${integration_id}/sync`,
+    GUILD_EMBED: id => `${BASE}/guilds/${id}/embed`,
 
     // Users
     USERS: () => `${BASE}/users`,

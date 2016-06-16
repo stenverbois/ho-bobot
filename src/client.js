@@ -4,7 +4,7 @@ const request = require('superagent');
 const WebSocket = require('ws');
 
 const User = require('./user');
-const Server = require('./server');
+const Guild = require('./guild');
 const Collection = require('./collection');
 const EndPoints = require('./api').EndPoints;
 
@@ -18,7 +18,7 @@ class Client extends EventEmitter {
         this.heartbeat =  null;
 
         // TEMP
-        this.servers = new Collection();
+        this.guilds = new Collection();
     }
 
     login(token) {
@@ -94,11 +94,11 @@ class Client extends EventEmitter {
                 this.emit('ready');
             }
             else if (msg.t === 'GUILD_CREATE') {
-                let server = new Server(msg_data);
-                this.servers.add(server);
+                let server = new Guild(msg_data);
+                this.guilds.add(server);
                 this.emit('server-created', server);
                 let test_str = "Members online: ";
-                this.servers.get("id", msg_data.id).members.all("online", true).forEach(member => {
+                this.guilds.get("id", msg_data.id).members.all("online", true).forEach(member => {
                     console.log(member.status);
                     test_str += member.username + ", ";
                 });

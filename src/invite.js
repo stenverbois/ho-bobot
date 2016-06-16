@@ -2,7 +2,7 @@ module.exports =
 class Invite {
     constructor(data) {
         this.code = data.code;
-        this.server = data.server;
+        this.guild = data.guild;
         this.channel = data.channel;
         this.xkcdpass = data.xkcdpass;
     }
