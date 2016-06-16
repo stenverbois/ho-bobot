@@ -29,7 +29,6 @@ class Server {
             user.status = presence.status;
             if (presence.game) {
                 user.game = presence.game;
-                console.log("Set game to " + presence.game.name);
             }
         });
     }
