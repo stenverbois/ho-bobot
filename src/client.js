@@ -85,6 +85,9 @@ class Client extends EventEmitter {
             const msg = JSON.parse(packet);
             const msg_data = msg.d;
 
+            // Log messages
+            fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
+            fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
 
             if (msg.t === 'READY') {
                 this.heartbeat = setInterval(() => {
@@ -92,8 +95,6 @@ class Client extends EventEmitter {
                 }, msg_data.heartbeat_interval);
 
                 this.emit('ready');
-                fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
-                fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
             }
             else if (msg.t === 'GUILD_CREATE') {
                 let server = new Guild(msg_data);
@@ -117,14 +118,8 @@ class Client extends EventEmitter {
 
             }
             else if (msg.t === 'PRESENCE_UPDATE') {
-                // Log messages
-                fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
-                fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
             }
             else {
-                // Log messages
-                fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
-                fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
                 console.log("Unknown t: " + JSON.stringify(msg.t));
             }
         });
