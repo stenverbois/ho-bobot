@@ -19,6 +19,11 @@ class Client extends EventEmitter {
         this.websocket = null;
         this.heartbeat =  null;
 
+        this.user_agent = {
+            url: 'https://github.com/stenverbois/ho-bobot',
+            version: 1
+        };
+
         // TEMP
         this.guilds = new Collection();
     }
@@ -102,21 +107,6 @@ class Client extends EventEmitter {
                     let server = new Guild(msg_data);
                     this.guilds.add(server);
                     this.emit('server-created', server);
-                    let test_str = "Members online: ";
-                    this.guilds.get("id", msg_data.id).members.all("online", true).forEach(member => {
-                        console.log(member.status);
-                        test_str += member.username + ", ";
-                    });
-                    console.log(test_str.substring(0, test_str.length - 2));
-                    if (msg_data.name === "Ho-BoBot Testing Grounds") {
-                        let req = request('POST', EndPoints.CHANNEL_MESSAGE(msg_data.id));
-                        req.set('User-Agent', {url:"https://github.com/stenverbois/ho-bobot", version: 1})
-                            .send({'content': test_str.substring(0, test_str.length - 2)})
-                            .set('authorization', this.token)
-                            .then(res => {
-                            // console.log(res)
-                        });
-                    }
                     break;
                 case 'GUILD_MEMBER_ADD':
                     //this.guilds.get("id",msg_data.guild_id).roles.add(new User(msg_data.user));
@@ -129,7 +119,6 @@ class Client extends EventEmitter {
                     break;
                 case 'GUILD_ROLE_DELETE':
                     console.log("Guild role deleted");
-                    console.log(msg_data.role_id);
                     this.guilds.get("id",msg_data.guild_id).roles.remove("id", msg_data.role_id);
                     break;
                 case 'MESSAGE_CREATE':
@@ -141,5 +130,19 @@ class Client extends EventEmitter {
                 }
             }
         );
+    }
+
+    apiRequest(method, endpoint, data) {
+        let req = request(method, endpoint);
+        req.set('User-Agent', this.user_agent)
+            .set('authorization', this.token)
+            .send(data);
+
+        return req.then(result => {
+                return result.body;
+            }, error => {
+                console.log(`API request to ${endpoint} (${method}) failed. Logs are in 'failed_api.log'.`);
+                fs.writeFileSync(`failed_api.log`, JSON.stringify(error, null, 2));
+            });
     }
 };

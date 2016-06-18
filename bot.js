@@ -11,9 +11,6 @@ client.on('ready', () => {
 client.on('server-created', (server) => {
     if(server.name === 'Ho-Bokes') {
         let web_str = 'Members online: ';
-        client.guilds.all().forEach(server => {
-            console.log('NAME ' + server.name);
-        });
         client.guilds.get('name', 'Ho-Bokes').members.all('online', true).forEach(member => {
             web_str += member.username + ', ';
         });
