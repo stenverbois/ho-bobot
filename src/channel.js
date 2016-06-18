@@ -1,4 +1,5 @@
 const Collection = require('./collection');
+const Overwrite = require('./overwrite');
 
 module.exports =
 class Channel {
@@ -14,7 +15,7 @@ class Channel {
         this.last_message_id = data.last_message_id;
         this.bitrate = data.bitrate;
 
-        this.permission_overwrites = Collection();
+        this.permission_overwrites = new Collection();
         data.permission_overwrites.forEach(permission_overwrite => {
             this.permission_overwrites.add(new Overwrite(permission_overwrite));
         });

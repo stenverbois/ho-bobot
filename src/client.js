@@ -7,6 +7,7 @@ const User = require('./user');
 const Guild = require('./guild');
 const Role = require('./role');
 const Message = require('./message');
+const Channel = require('./channel');
 const Collection = require('./collection');
 const EndPoints = require('./api').EndPoints;
 
@@ -26,6 +27,8 @@ class Client extends EventEmitter {
 
         // TEMP
         this.guilds = new Collection();
+        this.channels = new Collection();
+        this.users = new Collection();
     }
 
     login(token) {
@@ -104,7 +107,14 @@ class Client extends EventEmitter {
                   this.emit('ready');
                   break;
                 case 'GUILD_CREATE':
-                    let server = new Guild(msg_data);
+                    let members = [];
+                    msg_data.members.forEach(member => {
+                        members.push(new User(member.user));
+                    });
+                    let guild_members = new Collection();
+                    guild_members.add(members)
+                    let server = new Guild(msg_data, guild_members);
+                    this.users.add(members)
                     this.guilds.add(server);
                     this.emit('server-created', server);
                     break;
@@ -123,7 +133,23 @@ class Client extends EventEmitter {
                     break;
                 case 'MESSAGE_CREATE':
                     console.log("Message Created");
-                    // Message object?
+                    let mentions = new Collection();
+                    msg_data.mentions.forEach(mention => {
+                        mentions.add(this.users.get("id", mention.id));
+                    });
+                    let message = new Message(msg_data, this.users.get("id", msg_data.author.id), mentions);
+                    // TODO: do something with message
+                    break;
+                case 'CHANNEL_CREATE':
+                    console.log("Channel Created");
+                    let channel = new Channel(msg_data)
+                    this.guilds.get("id",msg_data.guild_id).channels.add(channel)
+                    this.channels.add(channel)
+                    break;
+                case 'CHANNEL_DELETE':
+                    console.log("Channel Deleted");
+                    this.guilds.get("id",msg_data.guild_id).channels.remove("id",msg_data.id)
+                    this.channels.remove("id",msg_data.id)
                     break;
                 default:
                     console.log("Unknown t: " + JSON.stringify(msg.t));

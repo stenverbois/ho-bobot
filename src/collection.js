@@ -23,7 +23,14 @@ class Collection {
     }
 
     add(item) {
-        this.collection[item.id] = item;
+        if (item instanceof Array){
+            item.forEach(element => {
+                this.add(element);
+            });
+        }
+        else {
+            this.collection[item.id] = item;
+        }
     }
 
     remove(key, value) {

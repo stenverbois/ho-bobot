@@ -1,10 +1,11 @@
 const Collection = require('./collection');
 const User = require('./user');
 const Role = require('./role');
+const Channel = require('./channel');
 
 module.exports =
 class Guild {
-    constructor(data) {
+    constructor(data, members) {
         this.id = data.id;
         this.name = data.name;
         this.icon = data.icon;
@@ -15,19 +16,24 @@ class Guild {
         this.afk_timeout = data.afk_timeout;
         this.embed_channel_id = data.embed_channel_id;
         this.verification_level = data.verification_level;
-        this.voice_states = data.voice_states;
-        this.roles = data.roles;
-        this.emojis = data.emojis;
         this.features = data.features;
+
+        // User objects created in Client
+        this.members = members;
+
+        this.channels = new Collection();
+        data.channels.forEach(channel => {
+            this.channels.add(new Channel(channel));
+        });
+
+        // TODO: voice state object
+        this.voice_states = new Collection();
+        // TODO: emoji objects
+        this.emojis = new Collection();
 
         this.roles = new Collection();
         data.roles.forEach(role => {
             this.roles.add(new Role(role));
-        });
-
-        this.members = new Collection();
-        data.members.forEach(member => {
-            this.members.add(new User(member.user));
         });
 
         data.presences.forEach(presence => {

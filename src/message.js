@@ -15,14 +15,15 @@ class Message {
         this.mention_everyone = data.mention_everyone;
         this.nonce = data.nonce;
 
+        // Mentions passed for same reason as author
         this.mentions = mentions;
 
-        this.attachments = Collection();
+        this.attachments = new Collection();
         data.attachments.forEach(attachment => {
             this.attachments.add(new Attachment(attachment));
         });
 
-        this.embeds = Collection();
+        this.embeds = new Collection();
         data.embeds.forEach(embed => {
             this.embeds.add(new Embed(embed));
         });
