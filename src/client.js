@@ -187,7 +187,6 @@ class Client extends EventEmitter {
                     this.emit('server-role-deleted');
                     break;
                 case 'MESSAGE_CREATE':
-                    console.log("Message Created");
                     let mentions = new Collection();
                     let channel_with_message = this.channels.get("id", msg_data.channel_id);
                     let guild_with_message = this.guilds.get("id", channel_with_message.guild_id);
@@ -195,8 +194,7 @@ class Client extends EventEmitter {
                         mentions.add(guild_with_message.get("id", mention.id));
                     });
                     let message = new Message(msg_data, guild_with_message.members.get("id", msg_data.author.id), mentions);
-                    // TODO: do something with message
-                    this.emit('message-created');
+                    this.emit('message-created', message);
                     break;
                 case 'MESSAGE_UPDATE':
                     this.emit('message-updated');

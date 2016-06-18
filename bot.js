@@ -27,6 +27,12 @@ client.on('presence-updated', (old_user, new_user) => {
     }
 });
 
+client.on('message-created', message => {
+    if (message.author.username === "Mezzo") {
+        client.guilds.get('name', 'Ho-BoBot Testing Grounds').createMessage("Nope");
+    }
+});
+
 client.login(process.env.BOT_ID);
 
 // Heroku app page

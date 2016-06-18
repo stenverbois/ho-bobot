@@ -7,7 +7,7 @@ class Channel {
         this.client = client;
 
         this.id = data.id;
-        this.guild_id = data.id;
+        this.guild_id = data.guild_id;
         this.name = data.name;
         this.content = data.content;
         this.type = data.type;

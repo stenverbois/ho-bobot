@@ -1,4 +1,6 @@
+const Attachment = require('./attachment');
 const Collection = require('./collection');
+const Embed = require('./embed');
 const User = require('./user');
 
 module.exports =
