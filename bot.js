@@ -28,8 +28,9 @@ client.on('presence-updated', (old_user, new_user) => {
 });
 
 client.on('message-created', message => {
-    if (message.author.username === "Mezzo") {
-        client.guilds.get('name', 'Ho-BoBot Testing Grounds').createMessage("Nope");
+    // Start of a command
+    if (message.content[0] === "!") {
+        let command = message.content.substring(1);
     }
 });
 
