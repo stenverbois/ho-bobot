@@ -5,7 +5,6 @@ class Collection {
     }
 
     get(key, value) {
-        let results = [];
         for (var item in this.collection) {
             if (this.collection[item][key] === value) {
                 return this.collection[item];
@@ -25,5 +24,14 @@ class Collection {
 
     add(item) {
         this.collection[item.id] = item;
+    }
+
+    remove(key, value){
+        //TODO: assume there could be multiple?
+        for (var item in this.collection) {
+            if (this.collection[item][key] === value) {
+                delete this.collection[item];
+            }
+        }
     }
 };

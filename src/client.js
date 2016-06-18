@@ -5,6 +5,7 @@ const WebSocket = require('ws');
 
 const User = require('./user');
 const Guild = require('./guild');
+const Role = require('./role');
 const Collection = require('./collection');
 const EndPoints = require('./api').EndPoints;
 
@@ -89,39 +90,52 @@ class Client extends EventEmitter {
             fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
             fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
 
-            if (msg.t === 'READY') {
-                this.heartbeat = setInterval(() => {
-                    this.websocket.send(JSON.stringify({op: 1, d: 0}));
-                }, msg_data.heartbeat_interval);
-
-                this.emit('ready');
-            }
-            else if (msg.t === 'GUILD_CREATE') {
-                let server = new Guild(msg_data);
-                this.guilds.add(server);
-                this.emit('server-created', server);
-                let test_str = "Members online: ";
-                this.guilds.get("id", msg_data.id).members.all("online", true).forEach(member => {
-                    console.log(member.status);
-                    test_str += member.username + ", ";
-                });
-                console.log(test_str.substring(0, test_str.length - 2));
-                if (msg_data.name === "Ho-BoBot Testing Grounds") {
-                    let req = request('POST', EndPoints.CHANNEL_MESSAGE(msg_data.id));
-                    req.set('User-Agent', {url:"https://github.com/stenverbois/ho-bobot", version: 1})
-                       .send({'content': test_str.substring(0, test_str.length - 2)})
-                       .set('authorization', this.token)
-                       .then(res => {
-                        // console.log(res)
+            switch(msg.t) {
+                case 'READY':
+                  this.heartbeat = setInterval(() => {
+                      this.websocket.send(JSON.stringify({op: 1, d: 0}));
+                  }, msg_data.heartbeat_interval);
+                  this.emit('ready');
+                  break;
+                case 'GUILD_CREATE':
+                    let server = new Guild(msg_data);
+                    this.guilds.add(server);
+                    this.emit('server-created', server);
+                    let test_str = "Members online: ";
+                    this.guilds.get("id", msg_data.id).members.all("online", true).forEach(member => {
+                        console.log(member.status);
+                        test_str += member.username + ", ";
                     });
+                    console.log(test_str.substring(0, test_str.length - 2));
+                    if (msg_data.name === "Ho-BoBot Testing Grounds") {
+                        let req = request('POST', EndPoints.CHANNEL_MESSAGE(msg_data.id));
+                        req.set('User-Agent', {url:"https://github.com/stenverbois/ho-bobot", version: 1})
+                            .send({'content': test_str.substring(0, test_str.length - 2)})
+                            .set('authorization', this.token)
+                            .then(res => {
+                            // console.log(res)
+                        });
+                    }
+                    break;
+                case 'PRESENCE_UPDATE':
+                    break;
+                case 'GUILD_ROLE_CREATE':
+                    console.log("Guild role created");
+                    this.guilds.get("id",msg_data.guild_id).roles.add(new Role(msg_data.role));
+                    break;
+                case 'GUILD_ROLE_DELETE':
+                    console.log("Guild role deleted");
+                    console.log(msg_data.role_id);
+                    this.guilds.get("id",msg_data.guild_id).roles.remove("id", msg_data.role_id);
+                    break;
+                case 'MESSAGE_CREATE':
+                    console.log("Message Created");
+                    // Message object?
+                    break;
+                default:
+                    console.log("Unknown t: " + JSON.stringify(msg.t));
                 }
-
             }
-            else if (msg.t === 'PRESENCE_UPDATE') {
-            }
-            else {
-                console.log("Unknown t: " + JSON.stringify(msg.t));
-            }
-        });
+        );
     }
 };

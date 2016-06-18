@@ -1,5 +1,6 @@
 const Collection = require('./collection');
 const User = require('./user');
+const Role = require('./role');
 
 module.exports =
 class Guild {
@@ -18,6 +19,11 @@ class Guild {
         this.roles = data.roles;
         this.emojis = data.emojis;
         this.features = data.features;
+
+        this.roles = new Collection();
+        data.roles.forEach(role => {
+            this.roles.add(new Role(role));
+        });
 
         this.members = new Collection();
         data.members.forEach(member => {
