@@ -26,7 +26,7 @@ class Collection {
         this.collection[item.id] = item;
     }
 
-    remove(key, value){
+    remove(key, value) {
         //TODO: assume there could be multiple?
         for (var item in this.collection) {
             if (this.collection[item][key] === value) {

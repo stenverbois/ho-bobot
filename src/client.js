@@ -117,6 +117,9 @@ class Client extends EventEmitter {
                         });
                     }
                     break;
+                case 'GUILD_MEMBER_ADD':
+                    //this.guilds.get("id",msg_data.guild_id).roles.add(new User(msg_data.user));
+                    break;
                 case 'PRESENCE_UPDATE':
                     break;
                 case 'GUILD_ROLE_CREATE':
