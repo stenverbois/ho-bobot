@@ -7,7 +7,9 @@ const Emoji = require('./emoji');
 
 module.exports =
 class Guild {
-    constructor(data, members, channels) {
+    constructor(data, members, channels, client) {
+        this.client = client;
+
         this.id = data.id;
         this.name = data.name;
         this.icon = data.icon;
@@ -50,5 +52,9 @@ class Guild {
                 user.game = presence.game;
             }
         });
+    }
+
+    createMessage(message) {
+        this.client.createMessage(this.id, message);
     }
 };
