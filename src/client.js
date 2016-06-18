@@ -110,24 +110,29 @@ class Client extends EventEmitter {
               case 'CHANNEL_CREATE':
                     console.log("Channel Created");
                     let channel = new Channel(msg_data);
-                    this.guilds.get("id",msg_data.guild_id).channels.add(channel);
+                    this.guilds.get('id', msg_data.guild_id).channels.add(channel);
                     this.channels.add(channel);
+                    this.emit('channel-created', channel);
                     break;
                 case 'CHANNEL_UPDATE':
                     console.log("Channel Updated");
                     this.channels.get("id", msg_data.id).update(msg_data);
+                    this.emit('channel-updated');
                     break;
                 case 'CHANNEL_DELETE':
                     console.log("Channel Deleted");
                     this.guilds.get("id",msg_data.guild_id).channels.remove("id",msg_data.id);
                     this.channels.remove("id",msg_data.id);
+                    this.emit('channel-deleted');
                     break;
                 case 'GUILD_BAN_ADD':
                     console.log("User Banned");
                     // TODO: fix (last get returns undefined)
                     //this.guilds.get("id",msg_data.guild_id).banned_users.add(this.users.get("id",msg_data.id));
+                    this.emit('user-banned');
                     break;
                 case 'GUILD_BAN_REMOVE':
+                    this.emit('user-unbanned');
                     break;
                 case 'GUILD_CREATE':
                     console.log(`Guild Created: ${msg_data.name}`);
@@ -149,29 +154,38 @@ class Client extends EventEmitter {
                     this.emit('server-created', server);
                     break;
                 case 'GUILD_EMOJI_UPDATE':
+                    this.emit('server-updated');
                     break;
                 case 'GUILD_DELETE':
+                    this.emit('server-deleted');
                     break;
                 case 'GUILD_INTEGRATIONS_UPDATE':
+                    this.emit('server-updated');
                     break;
                 case 'GUILD_MEMBER_ADD':
                     this.guilds.get("id",msg_data.guild_id).members.add(new User(msg_data.user));
+                    this.emit('server-member-added');
                     break;
                 case 'GUILD_MEMBER_REMOVE':
+                    this.emit('server-member-removed');
                     break;
                 case 'GUILD_MEMBER_UPDATE':
+                    this.emit('server-member-updated');
                     break;
                 case 'GUILD_MEMBERS_CHUNK':
                     break;
                 case 'GUILD_ROLE_CREATE':
                     console.log("Guild role created");
                     this.guilds.get("id",msg_data.guild_id).roles.add(new Role(msg_data.role));
+                    this.emit('server-role-created');
                     break;
                 case 'GUILD_ROLE_UPDATE':
+                    this.emit('server-role-updated');
                     break;
                 case 'GUILD_ROLE_DELETE':
                     console.log("Guild role deleted");
                     this.guilds.get("id",msg_data.guild_id).roles.remove("id", msg_data.role_id);
+                    this.emit('server-role-deleted');
                     break;
                 case 'MESSAGE_CREATE':
                     console.log("Message Created");
@@ -181,22 +195,31 @@ class Client extends EventEmitter {
                     });
                     let message = new Message(msg_data, this.users.get("id", msg_data.author.id), mentions);
                     // TODO: do something with message
+                    this.emit('message-created');
                     break;
                 case 'MESSAGE_UPDATE':
+                    this.emit('message-updated');
                     break;
                 case 'MESSAGE_DELETE':
+                    this.emit('message-deleted');
                     break;
                 case 'PRESENCE_UPDATE':
+                    this.emit('presence-updated');
                     break;
                 case 'TYPING_START':
+                    this.emit('typing');
                     break;
                 case 'USER_SETTINGS_UPDATE':
+                    this.emit('settings-updated');
                     break;
-                case 'USER_UPDDATE':
+                case 'USER_UPDATE':
+                    this.emit('user-updated');
                     break;
                 case 'VOICE_STATE_UPDATE':
+                    this.emit('voice-state-updated');
                     break;
                 case 'VOICE_SERVER_UPDATE':
+                    this.emit('voice-server-updated');
                     break;
                 default:
                     console.log("Unknown t: " + JSON.stringify(msg.t));
