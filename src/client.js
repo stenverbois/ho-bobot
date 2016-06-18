@@ -101,18 +101,18 @@ class Client extends EventEmitter {
 
             switch(msg.t) {
                 case 'READY':
-                console.log("Ready");
-                  this.heartbeat = setInterval(() => {
+                    console.log("Ready");
+                    this.heartbeat = setInterval(() => {
                       this.websocket.send(JSON.stringify({op: 1, d: 0}));
-                  }, msg_data.heartbeat_interval);
-                  this.emit('ready');
-                  break;
+                    }, msg_data.heartbeat_interval);
+                    this.emit('ready');
+                    break;
               case 'CHANNEL_CREATE':
-                  console.log("Channel Created");
-                  let channel = new Channel(msg_data);
-                  this.guilds.get("id",msg_data.guild_id).channels.add(channel);
-                  this.channels.add(channel);
-                  break;
+                    console.log("Channel Created");
+                    let channel = new Channel(msg_data);
+                    this.guilds.get("id",msg_data.guild_id).channels.add(channel);
+                    this.channels.add(channel);
+                    break;
                 case 'CHANNEL_UPDATE':
                     console.log("Channel Updated");
                     this.channels.get("id", msg_data.id).update(msg_data);
@@ -127,7 +127,7 @@ class Client extends EventEmitter {
                 case 'GUILD_BAN_REMOVE':
                     break;
                 case 'GUILD_CREATE':
-                    console.log("Guild Created");
+                    console.log(`Guild Created: ${msg_data.name}`);
                     let members = [];
                     msg_data.members.forEach(member => {
                         members.push(new User(member.user));
@@ -136,9 +136,9 @@ class Client extends EventEmitter {
                     guild_members.add(members);
                     let channels = [];
                     msg_data.channels.forEach(channel => {
-                        channels.push(new Channel(channel));
+                        channels.push(new Channel(channel, this));
                     });
-                    let server = new Guild(msg_data, guild_members, channels);
+                    let server = new Guild(msg_data, guild_members, channels, this);
                     // Global list updates
                     this.users.add(members);
                     this.channels.add(channels);
@@ -214,5 +214,12 @@ class Client extends EventEmitter {
                 console.log(`API request to ${endpoint} (${method}) failed. Logs are in 'failed_api.log'.`);
                 fs.writeFileSync(`failed_api.log`, JSON.stringify(error, null, 2));
             });
+    }
+
+    createMessage(channel_id, message) {
+        let data = {
+            'content': message
+        };
+        return this.apiRequest('POST', EndPoints.CHANNEL_MESSAGE(channel_id), data);
     }
 };

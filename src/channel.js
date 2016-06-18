@@ -3,7 +3,9 @@ const Overwrite = require('./overwrite');
 
 module.exports =
 class Channel {
-    constructor(data) {
+    constructor(data, client) {
+        this.client = client;
+
         this.id = data.id;
         this.guild_id = data.guild_id;
         this.name = data.name;
@@ -36,5 +38,9 @@ class Channel {
         new_data.permission_overwrites.forEach(permission_overwrite => {
             this.permission_overwrites.add(new Overwrite(permission_overwrite));
         });
+    }
+
+    createMessage(message) {
+        this.client.createMessage(this.id, message);
     }
 };
