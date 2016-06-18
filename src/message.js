@@ -3,7 +3,7 @@ const User = require('./user');
 
 module.exports =
 class Message {
-    constructor(data, author) {
+    constructor(data, author, mentions) {
         this.id = data.id;
         this.channel_id = data.channel_id;
         // Passed as arg to ensure it's the same one from the guild
@@ -15,10 +15,16 @@ class Message {
         this.mention_everyone = data.mention_everyone;
         this.nonce = data.nonce;
 
-        this.mentions = Collection();
+        this.mentions = mentions;
 
         this.attachments = Collection();
+        data.attachments.forEach(attachment => {
+            this.attachments.add(new Attachment(attachment));
+        });
 
         this.embeds = Collection();
+        data.embeds.forEach(embed => {
+            this.embeds.add(new Embed(embed));
+        });
     }
 };

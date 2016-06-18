@@ -15,5 +15,8 @@ class Channel {
         this.bitrate = data.bitrate;
 
         this.permission_overwrites = Collection();
+        data.permission_overwrites.forEach(permission_overwrite => {
+            this.permission_overwrites.add(new Overwrite(permission_overwrite));
+        });
     }
 };
