@@ -125,7 +125,7 @@ class Client extends EventEmitter {
                 case 'GUILD_BAN_ADD':
                     console.log("User Banned");
                     // TODO: fix (last get returns undefined)
-                    this.guilds.get("id",msg_data.guild_id).banned_users.add(this.users.get("id",msg_data.id));
+                    //this.guilds.get("id",msg_data.guild_id).banned_users.add(this.users.get("id",msg_data.id));
                     break;
                 case 'GUILD_BAN_REMOVE':
                     break;

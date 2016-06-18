@@ -2,6 +2,8 @@ const Collection = require('./collection');
 const User = require('./user');
 const Role = require('./role');
 const Channel = require('./channel');
+const VoiceState = require('./voicestate');
+const Emoji = require('./emoji');
 
 module.exports =
 class Guild {
@@ -26,10 +28,15 @@ class Guild {
         // User objects created in Client
         this.members = members;
 
-        // TODO: voice state object
         this.voice_states = new Collection();
-        // TODO: emoji objects
+        data.voice_states.forEach(voice_state => {
+            this.voice_states.add(new VoiceState(voice_state));
+        });
+
         this.emojis = new Collection();
+        data.emojis.forEach(emoji => {
+            this.emojis.add(new Emoji(emoji));
+        });
 
         this.roles = new Collection();
         data.roles.forEach(role => {
