@@ -106,6 +106,23 @@ class Client extends EventEmitter {
                   }, msg_data.heartbeat_interval);
                   this.emit('ready');
                   break;
+              case 'CHANNEL_CREATE':
+                  console.log("Channel Created");
+                  let channel = new Channel(msg_data)
+                  this.guilds.get("id",msg_data.guild_id).channels.add(channel)
+                  this.channels.add(channel)
+                  break;
+                case 'CHANNEL_UPDATE':
+                    break;
+                case 'CHANNEL_DELETE':
+                    console.log("Channel Deleted");
+                    this.guilds.get("id",msg_data.guild_id).channels.remove("id",msg_data.id)
+                    this.channels.remove("id",msg_data.id)
+                    break;
+                case 'GUILD_BAN_ADD':
+                    break;
+                case 'GUILD_BAN_REMOVE':
+                    break;
                 case 'GUILD_CREATE':
                     let members = [];
                     msg_data.members.forEach(member => {
@@ -118,14 +135,26 @@ class Client extends EventEmitter {
                     this.guilds.add(server);
                     this.emit('server-created', server);
                     break;
-                case 'GUILD_MEMBER_ADD':
-                    //this.guilds.get("id",msg_data.guild_id).roles.add(new User(msg_data.user));
+                case 'GUILD_EMOJI_UPDATE':
                     break;
-                case 'PRESENCE_UPDATE':
+                case 'GUILD_DELETE':
+                    break;
+                case 'GUILD_INTEGRATIONS_UPDATE':
+                    break;
+                case 'GUILD_MEMBER_ADD':
+                    this.guilds.get("id",msg_data.guild_id).members.add(new User(msg_data.user));
+                    break;
+                case 'GUILD_MEMBER_REMOVE':
+                    break;
+                case 'GUILD_MEMBER_UPDATE':
+                    break;
+                case 'GUILD_MEMBERS_CHUNK':
                     break;
                 case 'GUILD_ROLE_CREATE':
                     console.log("Guild role created");
                     this.guilds.get("id",msg_data.guild_id).roles.add(new Role(msg_data.role));
+                    break;
+                case 'GUILD_ROLE_UPDATE':
                     break;
                 case 'GUILD_ROLE_DELETE':
                     console.log("Guild role deleted");
@@ -140,16 +169,21 @@ class Client extends EventEmitter {
                     let message = new Message(msg_data, this.users.get("id", msg_data.author.id), mentions);
                     // TODO: do something with message
                     break;
-                case 'CHANNEL_CREATE':
-                    console.log("Channel Created");
-                    let channel = new Channel(msg_data)
-                    this.guilds.get("id",msg_data.guild_id).channels.add(channel)
-                    this.channels.add(channel)
+                case 'MESSAGE_UPDATE':
                     break;
-                case 'CHANNEL_DELETE':
-                    console.log("Channel Deleted");
-                    this.guilds.get("id",msg_data.guild_id).channels.remove("id",msg_data.id)
-                    this.channels.remove("id",msg_data.id)
+                case 'MESSAGE_DELETE':
+                    break;
+                case 'PRESENCE_UPDATE':
+                    break;
+                case 'TYPING_START':
+                    break;
+                case 'USER_SETTINGS_UPDATE':
+                    break;
+                case 'USER_UPDDATE':
+                    break;
+                case 'VOICE_STATE_UPDATE':
+                    break;
+                case 'VOICE_SERVER_UPDATE':
                     break;
                 default:
                     console.log("Unknown t: " + JSON.stringify(msg.t));
