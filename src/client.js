@@ -120,7 +120,7 @@ class Client extends EventEmitter {
                     break;
                 case 'CHANNEL_DELETE':
                     console.log("Channel Deleted");
-                    this.guilds.get("id",msg_data.guild_id).channels.remove("id",msg_data.id);
+                    this.guilds.get("id", msg_data.guild_id).channels.remove("id", msg_data.id);
                     this.channels.remove("id",msg_data.id);
                     this.emit('channel-deleted');
                     break;
@@ -143,7 +143,8 @@ class Client extends EventEmitter {
                     guild_members.add(members);
                     let channels = [];
                     msg_data.channels.forEach(channel => {
-                        channels.push(new Channel(channel, msg_data.id, this));
+                        channel.guild_id = msg_data.id;
+                        channels.push(new Channel(channel, this));
                     });
                     let server = new Guild(msg_data, guild_members, channels, this);
                     // Global list updates
@@ -188,7 +189,7 @@ class Client extends EventEmitter {
                 case 'MESSAGE_CREATE':
                     console.log("Message Created");
                     let mentions = new Collection();
-                    let channel_with_message = this.channels.get("id", msg_data.channel_id)
+                    let channel_with_message = this.channels.get("id", msg_data.channel_id);
                     let guild_with_message = this.guilds.get("id", channel_with_message.guild_id);
                     msg_data.mentions.forEach(mention => {
                         mentions.add(guild_with_message.get("id", mention.id));

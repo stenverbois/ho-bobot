@@ -3,11 +3,11 @@ const Overwrite = require('./overwrite');
 
 module.exports =
 class Channel {
-    constructor(data, guild_id, client) {
+    constructor(data, client) {
         this.client = client;
 
         this.id = data.id;
-        this.guild_id = guild_id;
+        this.guild_id = data.id;
         this.name = data.name;
         this.content = data.content;
         this.type = data.type;
