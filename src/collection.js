@@ -23,7 +23,7 @@ class Collection {
     }
 
     add(item) {
-        if (item instanceof Array){
+        if (item instanceof Array) {
             item.forEach(element => {
                 this.add(element);
             });
@@ -40,5 +40,11 @@ class Collection {
                 delete this.collection[item];
             }
         }
+    }
+
+    replace(id, item) {
+        let old = this.collection[id];
+        this.collection[id] = item;
+        return old;
     }
 };

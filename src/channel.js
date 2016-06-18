@@ -23,7 +23,7 @@ class Channel {
         });
     }
 
-    update(new_data){
+    update(new_data) {
         this.name = new_data.name === "undefined" ? this.name : new_data.name;
         this.content = new_data.content === "undefined" ? this.content : new_data.content;
         this.type = new_data.type === "undefined" ? this.type : new_data.type;

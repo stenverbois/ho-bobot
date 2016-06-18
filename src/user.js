@@ -7,10 +7,9 @@ class User {
         this.avatar = data.avatar;
         this.verified = data.verified;
         this.email = data.email;
-        this.nick = this.nick;
-        this.game = this.game;
-
-        this.status = "offline";
+        this.nick = data.nick;
+        this.game = data.game || null;
+        this.status = data.status || "offline";
     }
 
     equals(other) {
@@ -23,7 +22,15 @@ class User {
         return this.status === "online";
     }
 
-    update(new_data){
-        // TODO: finish (see channel update function)
+    update(new_data) {
+        ['id', 'username', 'discriminator', 'avatar', 'verified', 'email', 'nick', 'game', 'status'].forEach(prop => {
+            this[prop] = new_data[prop] === undefined ? this[prop] : new_data[prop];
+        });
+    }
+
+    complete(data) {
+        ['id', 'username', 'discriminator', 'avatar', 'verified', 'email', 'nick', 'game', 'status'].forEach(prop => {
+            this[prop] = this[prop] !== undefined ? this[prop] : data[prop];
+        });
     }
 };

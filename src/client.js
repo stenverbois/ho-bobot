@@ -205,10 +205,11 @@ class Client extends EventEmitter {
                     this.emit('message-deleted');
                     break;
                 case 'PRESENCE_UPDATE':
-                    // TODO: test
                     console.log("Presence Updated");
-                    this.guilds.get("id", msg_data.guild_id).members.get("id", msg_data.id).update(msg_data);
-                    this.emit('presence-updated');
+                    let new_user = new User(msg_data);
+                    let old_user = this.guilds.get("id", msg_data.guild_id).members.replace(msg_data.user.id, new_user);
+                    new_user.complete(old_user);
+                    this.emit('presence-updated', old_user, new_user);
                     break;
                 case 'TYPING_START':
                     this.emit('typing');

@@ -9,12 +9,21 @@ client.on('ready', () => {
 });
 
 client.on('server-created', (server) => {
-    if(server.name === 'Ho-Bokes') {
+    if (server.name === 'Ho-Bokes') {
         let web_str = 'Members online: ';
         client.guilds.get('name', 'Ho-Bokes').members.all('online', true).forEach(member => {
             web_str += member.username + ', ';
         });
         web_str = web_str.substring(0, web_str.length - 2);
+    }
+});
+
+client.on('presence-updated', (old_user, new_user) => {
+    if (old_user.game && !new_user.game) {
+        console.log(`${old_user.username} stopped playing ${old_user.game.name}`);
+    }
+    else if (!old_user.game && new_user.game) {
+        console.log(`${new_user.username} started playing ${new_user.game.name}`);
     }
 });
 
