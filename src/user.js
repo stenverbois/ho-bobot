@@ -22,4 +22,8 @@ class User {
     get online() {
         return this.status === "online";
     }
+
+    update(new_data){
+        // TODO: finish (see channel update function)
+    }
 };

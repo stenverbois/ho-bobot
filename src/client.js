@@ -28,7 +28,6 @@ class Client extends EventEmitter {
         // TEMP
         this.guilds = new Collection();
         this.channels = new Collection();
-        this.users = new Collection();
     }
 
     login(token) {
@@ -125,7 +124,7 @@ class Client extends EventEmitter {
                 case 'GUILD_BAN_ADD':
                     console.log("User Banned");
                     // TODO: fix (last get returns undefined)
-                    //this.guilds.get("id",msg_data.guild_id).banned_users.add(this.users.get("id",msg_data.id));
+                    //this.guilds.get("id",msg_data.guild_id).banned_users.add(this.guilds.get("id", msg_data.guild_id).get("id",msg_data.id));
                     break;
                 case 'GUILD_BAN_REMOVE':
                     break;
@@ -139,11 +138,10 @@ class Client extends EventEmitter {
                     guild_members.add(members);
                     let channels = [];
                     msg_data.channels.forEach(channel => {
-                        channels.push(new Channel(channel));
+                        channels.push(new Channel(channel, msg_data.id));
                     });
                     let server = new Guild(msg_data, guild_members, channels);
                     // Global list updates
-                    this.users.add(members);
                     this.channels.add(channels);
                     this.guilds.add(server);
                     this.emit('server-created', server);
@@ -158,6 +156,7 @@ class Client extends EventEmitter {
                     this.guilds.get("id",msg_data.guild_id).members.add(new User(msg_data.user));
                     break;
                 case 'GUILD_MEMBER_REMOVE':
+                    //this.guilds.get("id",msg_data.guild_id).members.remove(msg_data.id);
                     break;
                 case 'GUILD_MEMBER_UPDATE':
                     break;
@@ -176,10 +175,12 @@ class Client extends EventEmitter {
                 case 'MESSAGE_CREATE':
                     console.log("Message Created");
                     let mentions = new Collection();
+                    let channel_with_message = this.channels.get("id", msg_data.channel_id)
+                    let guild_with_message = this.guilds.get("id", channel_with_message.guild_id);
                     msg_data.mentions.forEach(mention => {
-                        mentions.add(this.users.get("id", mention.id));
+                        mentions.add(guild_with_message.get("id", mention.id));
                     });
-                    let message = new Message(msg_data, this.users.get("id", msg_data.author.id), mentions);
+                    let message = new Message(msg_data, guild_with_message.members.get("id", msg_data.author.id), mentions);
                     // TODO: do something with message
                     break;
                 case 'MESSAGE_UPDATE':
@@ -187,6 +188,9 @@ class Client extends EventEmitter {
                 case 'MESSAGE_DELETE':
                     break;
                 case 'PRESENCE_UPDATE':
+                    // TODO: test
+                    console.log("Presence Updated");
+                    this.guilds.get("id", msg_data.guild_id).members.get("id", msg_data.id).update(msg_data);
                     break;
                 case 'TYPING_START':
                     break;
