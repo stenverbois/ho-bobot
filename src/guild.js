@@ -5,7 +5,7 @@ const Channel = require('./channel');
 
 module.exports =
 class Guild {
-    constructor(data, members) {
+    constructor(data, members, channels) {
         this.id = data.id;
         this.name = data.name;
         this.icon = data.icon;
@@ -18,13 +18,11 @@ class Guild {
         this.verification_level = data.verification_level;
         this.features = data.features;
 
+        // Channel objects created in Client
+        this.channels = channels;
+
         // User objects created in Client
         this.members = members;
-
-        this.channels = new Collection();
-        data.channels.forEach(channel => {
-            this.channels.add(new Channel(channel));
-        });
 
         // TODO: voice state object
         this.voice_states = new Collection();

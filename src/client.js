@@ -101,6 +101,7 @@ class Client extends EventEmitter {
 
             switch(msg.t) {
                 case 'READY':
+                console.log("Ready");
                   this.heartbeat = setInterval(() => {
                       this.websocket.send(JSON.stringify({op: 1, d: 0}));
                   }, msg_data.heartbeat_interval);
@@ -108,30 +109,39 @@ class Client extends EventEmitter {
                   break;
               case 'CHANNEL_CREATE':
                   console.log("Channel Created");
-                  let channel = new Channel(msg_data)
-                  this.guilds.get("id",msg_data.guild_id).channels.add(channel)
-                  this.channels.add(channel)
+                  let channel = new Channel(msg_data);
+                  this.guilds.get("id",msg_data.guild_id).channels.add(channel);
+                  this.channels.add(channel);
                   break;
                 case 'CHANNEL_UPDATE':
+                    console.log("Channel Updated");
+                    this.channels.get("id", msg_data.id).update(msg_data);
                     break;
                 case 'CHANNEL_DELETE':
                     console.log("Channel Deleted");
-                    this.guilds.get("id",msg_data.guild_id).channels.remove("id",msg_data.id)
-                    this.channels.remove("id",msg_data.id)
+                    this.guilds.get("id",msg_data.guild_id).channels.remove("id",msg_data.id);
+                    this.channels.remove("id",msg_data.id);
                     break;
                 case 'GUILD_BAN_ADD':
                     break;
                 case 'GUILD_BAN_REMOVE':
                     break;
                 case 'GUILD_CREATE':
+                    console.log("Guild Created");
                     let members = [];
                     msg_data.members.forEach(member => {
                         members.push(new User(member.user));
                     });
                     let guild_members = new Collection();
-                    guild_members.add(members)
-                    let server = new Guild(msg_data, guild_members);
-                    this.users.add(members)
+                    guild_members.add(members);
+                    let channels = [];
+                    msg_data.channels.forEach(channel => {
+                        channels.push(new Channel(channel));
+                    });
+                    let server = new Guild(msg_data, guild_members, channels);
+                    // Global list updates
+                    this.users.add(members);
+                    this.channels.add(channels);
                     this.guilds.add(server);
                     this.emit('server-created', server);
                     break;
