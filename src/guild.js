@@ -18,6 +18,8 @@ class Guild {
         this.verification_level = data.verification_level;
         this.features = data.features;
 
+        this.banned_users = new Collection();
+
         // Channel objects created in Client
         this.channels = channels;
 
