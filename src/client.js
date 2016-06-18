@@ -6,6 +6,7 @@ const WebSocket = require('ws');
 const User = require('./user');
 const Guild = require('./guild');
 const Role = require('./role');
+const Message = require('./message');
 const Collection = require('./collection');
 const EndPoints = require('./api').EndPoints;
 

@@ -7,7 +7,7 @@ class Role {
         this.hoist = data.hoist;
         this.position = data.position;
         this.permissions = data.permissions;
-        this.managed = this.managed;
-        this.mentionable = this.mentionable;
+        this.managed = data.managed;
+        this.mentionable = data.mentionable;
     }
 };
