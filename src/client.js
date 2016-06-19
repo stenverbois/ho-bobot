@@ -101,8 +101,10 @@ class Client extends EventEmitter {
             const msg = JSON.parse(packet);
 
             // Log messages
-            fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
-            fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
+            if(process.env.NODE_ENV === "development") {
+                fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
+                fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
+            }
 
             switch(msg.op) {
                 case OpCodes.DISPATCH:
@@ -269,13 +271,15 @@ class Client extends EventEmitter {
         return req.then(result => {
                 return result.body;
             }, error => {
-                console.log(`API request to ${endpoint} (${method}) failed. Logs are in 'failed_api.log'.`);
-                fs.writeFileSync(`failed_api.log`, JSON.stringify(error, null, 2));
+                console.log(`API request to ${endpoint} (${method}) failed. Logs are in 'failed_api.log' (development only).`);
+                if(process.env.NODE_ENV === "development") {
+                    fs.appendFileSync(`failed_api.log`, JSON.stringify(error, null, 2));
+                }
             });
     }
 
     createMessage(channel_id, message, tts) {
-        if (typeof(tts)==='undefined') tts=0;
+        if (typeof(tts)==='undefined') tts = 0;
         let data = {
             'content': message,
             'tts': tts
@@ -285,5 +289,9 @@ class Client extends EventEmitter {
 
     deleteMessage(channel_id, message_id) {
         return this.apiRequest('DELETE', EndPoints.CHANNEL_MESSAGE_EDIT(channel_id, message_id));
+    }
+
+    getMessages(channel_id, limit=50) {
+        return this.apiRequest('GET', `${EndPoints.CHANNEL_MESSAGE(channel_id)}?limit=${limit}`);
     }
 };
