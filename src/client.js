@@ -138,6 +138,8 @@ class Client extends EventEmitter {
                     console.log(`Guild Created: ${msg_data.name}`);
                     let members = [];
                     msg_data.members.forEach(member => {
+                        // Flatten member.user into member
+                        for (var attrname in member.user) { member[attrname] = member.user[attrname]; }
                         members.push(new User(member));
                     });
                     let guild_members = new Collection();
@@ -163,7 +165,9 @@ class Client extends EventEmitter {
                     this.emit('server-updated');
                     break;
                 case 'GUILD_MEMBER_ADD':
-                    this.guilds.get("id",msg_data.guild_id).members.add(new User(msg_data.user));
+                    // Flatten msg_data.user into msg_data
+                    for (var attrname in msg_data.user) { msg_data[attrname] =msg_data.user[attrname]; }
+                    this.guilds.get("id",msg_data.guild_id).members.add(new User(msg_data));
                     this.emit('server-member-added');
                     break;
                 case 'GUILD_MEMBER_REMOVE':

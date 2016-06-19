@@ -4,9 +4,9 @@ module.exports =
 class User {
     constructor(data) {
         this.id = data.user.id;
-        this.username = data.user.username;
-        this.discriminator = data.user.discriminator;
-        this.avatar = data.user.avatar;
+        this.username = data.username;
+        this.discriminator = data.discriminator;
+        this.avatar = data.avatar;
         this.verified = data.verified;
         this.email = data.email;
         this.nick = data.nick;
