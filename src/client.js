@@ -100,6 +100,10 @@ class Client extends EventEmitter {
             }
             const msg = JSON.parse(packet);
 
+            // Log messages
+            fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
+            fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
+
             switch(msg.op) {
                 case OpCodes.DISPATCH:
                     this.processDispatch(msg);
@@ -107,11 +111,6 @@ class Client extends EventEmitter {
                 default:
                     console.log(`Unexpected opcode ${msg.op}`);
             }
-
-            // Log messages
-            fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
-            fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
-
         });
     }
 
