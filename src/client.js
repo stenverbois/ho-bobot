@@ -155,14 +155,12 @@ class Client extends EventEmitter {
                 break;
             case 'GUILD_CREATE':
                 console.log(`Guild Created: ${msg_data.name}`);
-                let members = [];
+                let guild_members = new Collection();
                 msg_data.members.forEach(member => {
                     // Flatten member.user into member
                     for (let attrname in member.user) { member[attrname] = member.user[attrname]; }
-                    members.push(new User(member));
+                    guild_members.add(new User(member));
                 });
-                let guild_members = new Collection();
-                guild_members.add(members);
                 msg_data.voice_states.forEach(voice_state => {
                     guild_members.get("id", voice_state.user_id).voicestate = new VoiceState(voice_state);
                 });
