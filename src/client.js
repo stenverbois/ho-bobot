@@ -285,4 +285,8 @@ class Client extends EventEmitter {
         };
         return this.apiRequest('POST', EndPoints.CHANNEL_MESSAGE(channel_id), data);
     }
+
+    deleteMessage(channel_id, message_id) {
+        return this.apiRequest('DELETE', EndPoints.CHANNEL_MESSAGE_EDIT(channel_id, message_id));
+    }
 };
