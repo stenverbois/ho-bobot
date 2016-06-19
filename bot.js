@@ -89,6 +89,14 @@ client.on('message-created', message => {
             case 'icyveins':
                 client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide`);
                 break;
+            case 'hots':
+                if (args[0].toLowerCase() === "murky"){
+                    client.createMessage(message.channel_id, "Fuck Murky", true);
+                    break;
+                }
+                client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide \n`);
+                client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${args.join('-')}`);
+                break;
         }
     }
 });

@@ -2,7 +2,7 @@ const Thumbnail = require('./thumbnail');
 const Provider = require('./provider');
 
 module.exports =
-class Overwrite {
+class Embed {
     constructor(data) {
         this.title = data.title;
         this.type = data.type;
