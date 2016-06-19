@@ -102,8 +102,10 @@ client.on('message-created', message => {
 });
 
 client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id) => {
-    let entermessage = `${user.name} has entered the voice channel`;
-    let leavemessage = `${user.name} has left the voice channel`;
+    // let entermessage = `${user.name} has entered the voice channel`;
+    // let leavemessage = `${user.name} has left the voice channel`;
+    let entermessage = ``;
+    let leavemessage = ``;
     if (isUser(user, "Arno")) {
         entermessage = "A wild fag appeared";
         leavemessage = "Good riddance";

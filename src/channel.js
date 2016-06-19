@@ -29,6 +29,6 @@ class Channel extends Updatable {
         this.client.createMessage(this.id, message);
     }
     get attributes() {
-        return ["guild_id", "name", "content", "type", "position", "is_private", "topic", "last_message_id", "bitrate"];
+        return ["id", "guild_id", "name", "content", "type", "position", "is_private", "topic", "last_message_id", "bitrate"];
     }
 };

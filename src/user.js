@@ -14,8 +14,7 @@ class User extends Updatable {
         this.nick = data.nick;
         this.game = data.game || null;
         this.status = data.status || "offline";
-        let default_data = {};
-        this.voicestate = new VoiceState(default_data);
+        this.voicestate = new VoiceState({});
     }
 
     equals(other) {
@@ -33,6 +32,6 @@ class User extends Updatable {
     }
 
     get attributes() {
-        return ["username", "discriminator", "avatar", "verified", "email", "nick", "game", "status"];
+        return ["id", "username", "discriminator", "avatar", "verified", "email", "nick", "game", "status"];
     }
 };

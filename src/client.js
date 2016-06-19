@@ -248,7 +248,7 @@ class Client extends EventEmitter {
                 break;
             case 'VOICE_STATE_UPDATE':
                 let new_voicestate = new VoiceState(msg_data);
-                let voicestate_user = this.guilds.get("id",msg_data.guild_id).members.get("id", msg_data.user_id);
+                let voicestate_user = this.guilds.get("id", msg_data.guild_id).members.get("id", msg_data.user_id);
                 let old_voicestate = voicestate_user.voicestate;
                 voicestate_user.voicestate = new_voicestate;
 
@@ -278,13 +278,14 @@ class Client extends EventEmitter {
             });
     }
 
-    createMessage(channel_id, message, tts) {
-        if (typeof(tts)==='undefined') tts = 0;
+    createMessage(channel_id, message, tts=false) {
         let data = {
             'content': message,
             'tts': tts
         };
-        return this.apiRequest('POST', EndPoints.CHANNEL_MESSAGE(channel_id), data);
+        if (data.content) {
+            return this.apiRequest('POST', EndPoints.CHANNEL_MESSAGE(channel_id), data);
+        }
     }
 
     deleteMessage(channel_id, message_id) {
