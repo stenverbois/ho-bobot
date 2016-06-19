@@ -1,15 +1,19 @@
+const VoiceState = require('./voicestate');
+
 module.exports =
 class User {
     constructor(data) {
-        this.id = data.id;
-        this.username = data.username;
-        this.discriminator = data.discriminator;
-        this.avatar = data.avatar;
+        this.id = data.user.id;
+        this.username = data.user.username;
+        this.discriminator = data.user.discriminator;
+        this.avatar = data.user.avatar;
         this.verified = data.verified;
         this.email = data.email;
         this.nick = data.nick;
         this.game = data.game || null;
         this.status = data.status || "offline";
+        let default_data = {};
+        this.voicestate = new VoiceState(default_data);
     }
 
     equals(other) {

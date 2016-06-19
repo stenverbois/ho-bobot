@@ -8,6 +8,7 @@ const Guild = require('./guild');
 const Role = require('./role');
 const Message = require('./message');
 const Channel = require('./channel');
+const VoiceState = require('./voicestate');
 const Collection = require('./collection');
 const EndPoints = require('./api').EndPoints;
 
@@ -137,7 +138,7 @@ class Client extends EventEmitter {
                     console.log(`Guild Created: ${msg_data.name}`);
                     let members = [];
                     msg_data.members.forEach(member => {
-                        members.push(new User(member.user));
+                        members.push(new User(member));
                     });
                     let guild_members = new Collection();
                     guild_members.add(members);
@@ -219,7 +220,12 @@ class Client extends EventEmitter {
                     this.emit('user-updated');
                     break;
                 case 'VOICE_STATE_UPDATE':
-                    this.emit('voice-state-updated');
+                    let new_voicestate = new VoiceState(msg_data);
+                    let voicestate_user = this.guilds.get("id",msg_data.guild_id).members.get("id", msg_data.user_id);
+                    let old_voicestate = voicestate_user.voicestate;
+                    voicestate_user.voicestate = new_voicestate;
+
+                    this.emit('voice-state-updated', old_voicestate, new_voicestate, voicestate_user, msg_data.guild_id);
                     break;
                 case 'VOICE_SERVER_UPDATE':
                     this.emit('voice-server-updated');
@@ -245,9 +251,11 @@ class Client extends EventEmitter {
             });
     }
 
-    createMessage(channel_id, message) {
+    createMessage(channel_id, message, tts) {
+        if (typeof(tts)==='undefined') tts=0;
         let data = {
-            'content': message
+            'content': message,
+            'tts': tts
         };
         return this.apiRequest('POST', EndPoints.CHANNEL_MESSAGE(channel_id), data);
     }

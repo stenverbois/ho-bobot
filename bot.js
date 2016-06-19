@@ -19,18 +19,40 @@ client.on('server-created', (server) => {
 });
 
 client.on('presence-updated', (old_user, new_user) => {
+    // User entering/quitting game
     if (old_user.game && !new_user.game) {
         console.log(`${old_user.username} stopped playing ${old_user.game.name}`);
     }
     else if (!old_user.game && new_user.game) {
         console.log(`${new_user.username} started playing ${new_user.game.name}`);
     }
+    // User coming online/going offline
+    if (old_user.online && !new_user.online) {
+        console.log(`${new_user.username} has logged off`);
+    }
+    else if (!old_user.online && new_user.online) {
+        console.log(`${new_user.username} has come online`);
+    }
+
 });
 
 client.on('message-created', message => {
     // Start of a command
     if (message.content[0] === "!") {
         let command = message.content.substring(1);
+    }
+});
+
+client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id) => {
+    // Check if user changed channel
+    if (old_voicestate.channel_id !== new_voicestate.channel_id) {
+        console.log(`${user.nick} changed voice channels`);
+        if(new_voicestate.channel_id !== null && new_voicestate.channel_id !== undefined){
+            client.createMessage(guild_id, `${user.nick} has entered the voice channel`, true);
+        }
+        if(old_voicestate.channel_id !== null && old_voicestate.channel_id !== undefined){
+            client.createMessage(guild_id, `${user.nick} has left the voice channel`, true);
+        }
     }
 });
 
