@@ -74,7 +74,7 @@ client.on('message-created', message => {
     if (message.content[0] === '!') {
         let split_string = message.content.split(' ');
         let command = split_string[0].substring(1);
-        let arguments = split_string.slice(1)
+        let args = split_string.slice(1);
         if (isUser(message.author, "Arno")) {
             client.createMessage(message.channel_id, `Arno used '${command}', it's not very effective...`);
             return;
@@ -84,10 +84,10 @@ client.on('message-created', message => {
                 client.createMessage(message.channel_id, `I have been ruling this server for ${msToTime(client.uptime())}`);
                 break;
             case 'heroesfire':
-                client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${arguments.join('-')}`);
+                client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${args.join('-')}`);
                 break;
             case 'icyveins':
-                client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${arguments.join('-')}-build-guide`);
+                client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide`);
                 break;
         }
     }
