@@ -37,9 +37,20 @@ client.on('presence-updated', (old_user, new_user) => {
 });
 
 client.on('message-created', message => {
+    let split_string = [];
     // Start of a command
     if (message.content[0] === "!") {
         let command = message.content.substring(1);
+        split_string = command.split(" ");
+    }
+    // HOTS links
+    if (split_string[0] === "heroesfire"){
+        let link = `http://www.heroesfire.com/hots/wiki/heroes/${split_string[1]}`;
+        client.createMessage(message.channel_id, link);
+    }
+    if (split_string[0] === "icyveins"){
+        let link = `http://www.icy-veins.com/heroes/${split_string.slice(1).join("-")}-build-guide`;
+        client.createMessage(message.channel_id, link);
     }
 });
 
