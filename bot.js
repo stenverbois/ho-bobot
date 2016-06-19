@@ -4,7 +4,7 @@ const Client = require('./src/client');
 let web_str = '';
 
 function isUser(user, name) {
-    if (name === "Arno") { return user.username === "Nintenrax" && user.discriminator === "3078"; }
+    if (name === "Arno") { return user.username === "Nintenrax" && user.discriminator === "3087"; }
     else if (name === "Tristan") { return user.username === "tristanvandeputte" && user.discriminator === "6353"; }
     else if (name === "Sten") { return user.username === "Mezzo" && user.discriminator === "9210"; }
     else if (name === "Beau") { return user.username === "Void" && user.discriminator === "2721"; }
