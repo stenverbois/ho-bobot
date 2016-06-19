@@ -23,9 +23,14 @@ class Channel extends Updatable {
         data.permission_overwrites.forEach(permission_overwrite => {
             this.permission_overwrites.add(new Overwrite(permission_overwrite));
         });
+        console.log(this.name);
+        console.log(this.topic);
     }
 
     createMessage(message) {
         this.client.createMessage(this.id, message);
+    }
+    get attributes() {
+        return ["guild_id", "name", "content", "type", "position", "is_private", "topic", "last_message_id", "bitrate"];
     }
 };
