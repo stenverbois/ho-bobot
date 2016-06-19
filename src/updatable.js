@@ -12,7 +12,7 @@ class Updatable {
 
     complete(new_data) {
         this.attributes.forEach( attrname => {
-            this[attrname] = new_data[attrname] !== undefined ? this[attrname] : new_data[attrname];
+            this[attrname] = this[attrname] !== undefined ? this[attrname] : new_data[attrname];
         });
     }
 
