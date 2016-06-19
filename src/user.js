@@ -1,9 +1,11 @@
 const VoiceState = require('./voicestate');
+const Updatable = require('./updatable');
 
 module.exports =
-class User {
+class User extends Updatable {
     constructor(data) {
-        this.id = data.user.id;
+        super();
+        this.id = data.id;
         this.username = data.username;
         this.discriminator = data.discriminator;
         this.avatar = data.avatar;
@@ -24,17 +26,5 @@ class User {
 
     get online() {
         return this.status === "online";
-    }
-
-    update(new_data) {
-        ['id', 'username', 'discriminator', 'avatar', 'verified', 'email', 'nick', 'game', 'status'].forEach(prop => {
-            this[prop] = new_data[prop] === undefined ? this[prop] : new_data[prop];
-        });
-    }
-
-    complete(data) {
-        ['id', 'username', 'discriminator', 'avatar', 'verified', 'email', 'nick', 'game', 'status'].forEach(prop => {
-            this[prop] = this[prop] !== undefined ? this[prop] : data[prop];
-        });
     }
 };
