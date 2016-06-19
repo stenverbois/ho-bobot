@@ -27,7 +27,11 @@ class User extends Updatable {
     get online() {
         return this.status === "online";
     }
-    
+
+    get name() {
+        return this.nick || this.username;
+    }
+
     get attributes() {
         return ["username", "discriminator", "avatar", "verified", "email", "nick", "game", "status"];
     }

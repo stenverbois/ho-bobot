@@ -23,8 +23,6 @@ class Channel extends Updatable {
         data.permission_overwrites.forEach(permission_overwrite => {
             this.permission_overwrites.add(new Overwrite(permission_overwrite));
         });
-        console.log(this.name);
-        console.log(this.topic);
     }
 
     createMessage(message) {

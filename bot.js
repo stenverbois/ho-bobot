@@ -28,10 +28,10 @@ client.on('presence-updated', (old_user, new_user) => {
     }
     // User coming online/going offline
     if (old_user.online && !new_user.online) {
-        console.log(`${new_user.username} has logged off`);
+        console.log(`${new_user.name} has logged off`);
     }
     else if (!old_user.online && new_user.online) {
-        console.log(`${new_user.username} has come online`);
+        console.log(`${new_user.name} has come online`);
     }
 
 });
@@ -47,10 +47,10 @@ client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id
     // Check if user changed channel
     if (old_voicestate.channel_id !== new_voicestate.channel_id) {
         if(new_voicestate.channel_id !== null && new_voicestate.channel_id !== undefined){
-            client.createMessage(guild_id, `${user.nick} has entered the voice channel`, true);
+            client.createMessage(guild_id, `${user.name} has entered the voice channel`, true);
         }
         if(old_voicestate.channel_id !== null && old_voicestate.channel_id !== undefined){
-            client.createMessage(guild_id, `${user.nick} has left the voice channel`, true);
+            client.createMessage(guild_id, `${user.name} has left the voice channel`, true);
         }
     }/* TODO: this does not trigger a voice state update i think
     // Check if user deafened him/herself

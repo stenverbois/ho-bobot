@@ -174,6 +174,8 @@ class Client extends EventEmitter {
                     this.emit('server-member-removed');
                     break;
                 case 'GUILD_MEMBER_UPDATE':
+                    for (var attrname in msg_data.user) { msg_data[attrname] =msg_data.user[attrname]; }
+                    this.guilds.get("id",msg_data.guild_id).members.get("id", msg_data.id).update(msg_data);
                     this.emit('server-member-updated');
                     break;
                 case 'GUILD_MEMBERS_CHUNK':
