@@ -1,4 +1,3 @@
-const Thumbnail = require('./thumbnail');
 const Provider = require('./provider');
 const Collection = require('./collection');
 
