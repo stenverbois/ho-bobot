@@ -70,29 +70,26 @@ client.on('presence-updated', (old_user, new_user) => {
 });
 
 client.on('message-created', message => {
-    let split_string = [];
     // Start of a command
-    let command = ''
-    let arguments = []
     if (message.content[0] === '!') {
         let split_string = message.content.split(' ');
-        command = split_string[0].substring(1);
-        arguments = split_string.slice(1)
-    }
-    if (isUser(message.author, "Arno")) {
-        client.createMessage(message.channel_id, `Arno used '${command}', it's not very effective...`);
-        return;
-    }
-    switch (command) {
-        case 'uptime':
-            client.createMessage(message.channel_id, `I have been ruling this server for ${msToTime(client.uptime())}`);
-            break;
-        case 'heroesfire':
-            client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${arguments[0]}`);
-            break;
-        case 'icyveins':
-            client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${arguments.join('-')}-build-guide`);
-            break;
+        let command = split_string[0].substring(1);
+        let arguments = split_string.slice(1)
+        if (isUser(message.author, "Arno")) {
+            client.createMessage(message.channel_id, `Arno used '${command}', it's not very effective...`);
+            return;
+        }
+        switch (command) {
+            case 'uptime':
+                client.createMessage(message.channel_id, `I have been ruling this server for ${msToTime(client.uptime())}`);
+                break;
+            case 'heroesfire':
+                client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${arguments.join('-')}`);
+                break;
+            case 'icyveins':
+                client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${arguments.join('-')}-build-guide`);
+                break;
+        }
     }
 });
 
