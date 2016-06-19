@@ -112,8 +112,7 @@ class Client extends EventEmitter {
             fs.appendFileSync(`${msg.t}.log`, JSON.stringify(msg, null, 2));
             fs.appendFileSync(`${msg.t}.log`, "\n-------------------------------\n");
 
-            }
-        );
+        });
     }
 
     processDispatch(msg) {
@@ -159,7 +158,7 @@ class Client extends EventEmitter {
                 let members = [];
                 msg_data.members.forEach(member => {
                     // Flatten member.user into member
-                    for (var attrname in member.user) { member[attrname] = member.user[attrname]; }
+                    for (let attrname in member.user) { member[attrname] = member.user[attrname]; }
                     members.push(new User(member));
                 });
                 let guild_members = new Collection();
@@ -186,7 +185,7 @@ class Client extends EventEmitter {
                 break;
             case 'GUILD_MEMBER_ADD':
                 // Flatten msg_data.user into msg_data
-                for (var attrname in msg_data.user) { msg_data[attrname] =msg_data.user[attrname]; }
+                for (let attrname in msg_data.user) { msg_data[attrname] = msg_data.user[attrname]; }
                 this.guilds.get("id",msg_data.guild_id).members.add(new User(msg_data));
                 this.emit('server-member-added');
                 break;
@@ -194,6 +193,8 @@ class Client extends EventEmitter {
                 this.emit('server-member-removed');
                 break;
             case 'GUILD_MEMBER_UPDATE':
+                for (let attrname in msg_data.user) { msg_data[attrname] = msg_data.user[attrname]; }
+                this.guilds.get("id",msg_data.guild_id).members.get("id", msg_data.id).update(msg_data);
                 this.emit('server-member-updated');
                 break;
             case 'GUILD_MEMBERS_CHUNK':
