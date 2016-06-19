@@ -44,24 +44,41 @@ client.on('message-created', message => {
 });
 
 client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id) => {
+    let entermessage = `${user.name} has entered the voice channel`;
+    let leavemessage = `${user.name} has left the voice channel`;
+    if (isUser(user, "Arno")){
+        entermessage = "A wild fag appeared";
+        leavemessage = "Good riddance";
+    }
+    else if (isUser(user, "Tristan")){
+        entermessage = "God has arrived";
+        leavemessage = `We weep at your departure ${user.name}`;
+    }
+    else if (isUser(user, "Sten")){}
+    else if (isUser(user, "Beau")){}
+    else if (isUser(user, "Mitchell")){
+        entermessage = "RAGE INCOMING";
+    }
+
     // Check if user changed channel
     if (old_voicestate.channel_id !== new_voicestate.channel_id) {
-        if(new_voicestate.channel_id !== null && new_voicestate.channel_id !== undefined){
-            client.createMessage(guild_id, `${user.name} has entered the voice channel`, true);
+        if (new_voicestate.channel_id !== null && new_voicestate.channel_id !== undefined){
+            client.createMessage(guild_id, entermessage, true);
         }
-        if(old_voicestate.channel_id !== null && old_voicestate.channel_id !== undefined){
-            client.createMessage(guild_id, `${user.name} has left the voice channel`, true);
+        if (old_voicestate.channel_id !== null && old_voicestate.channel_id !== undefined){
+            client.createMessage(guild_id, leavemessage, true);
         }
-    }/* TODO: this does not trigger a voice state update i think
-    // Check if user deafened him/herself
-    if (!old_voicestate.self_deaf && new_voicestate.self_deaf) {
-        client.createMessage(guild_id, `${user.nick} turned their sound off`, true);
     }
-    // Check if user muted him/herself
-    if (!old_voicestate.self_mute && new_voicestate.self_mute) {
-        client.createMessage(guild_id, `${user.nick} has turned their microfone off`, true);
-    }*/
 });
+
+function isUser(user, name) {
+    if (name === "Arno"){ return user.username === "Nintenrax" && user.discriminator === "3078"; }
+    else if (name === "Tristan"){ return user.username === "tristanvandeputte" && user.discriminator === "6353"; }
+    else if (name === "Sten"){ return user.username === "Mezzo" && user.discriminator === "9210"; }
+    else if (name === "Beau"){ return user.username === "Void" && user.discriminator === "2721"; }
+    else if (name === "Mitchell"){ return user.username === "SunlightHurtsMe" && user.discriminator === "2587"; }
+    // Rest of ppls
+}
 
 client.login(process.env.BOT_ID);
 
