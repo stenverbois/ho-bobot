@@ -1,5 +1,8 @@
 const http = require('http');
+const semver = require('semver');
+
 const Client = require('./src/client');
+const Changelog = require('./CHANGELOG');
 
 let web_str = '';
 
@@ -36,6 +39,18 @@ function msToTime(s) {
   return time_str;
 }
 
+function versionToPatchNotes(version) {
+    let patch_str = `**${version.version}**:
+_Date_: ${version.date}
+_Changes_:\n`;
+
+    version.changes.forEach(change => {
+        patch_str += `\t- ${change}\n`;
+    });
+
+    return patch_str;
+}
+
 let client = new Client();
 client.on('ready', () => {
     client.setClientGame('WORLD DOMINATION');
@@ -43,11 +58,19 @@ client.on('ready', () => {
 
 client.on('server-created', (server) => {
     if (server.name === 'Ho-Bokes') {
-        let web_str = 'Members online: ';
-        client.guilds.get('name', 'Ho-Bokes').members.all('online', true).forEach(member => {
-            web_str += member.username + ', ';
+        client.getMessages(server.channels.get("name", "hobobot-changelog").id, 1).then(messages => {
+            let last_patch = messages[0].content;
+            let version = "";
+            if (last_patch.startsWith("**v")) {
+                version = last_patch.split('\n')[0].replace(/\*|:/g, "");
+            }
+            Changelog.versions.forEach(v => {
+                if (!semver.valid(version) || semver.gt(v.version, version)) {
+                    client.createMessage(server.channels.get("name", "hobobot-changelog").id, versionToPatchNotes(v));
+                }
+            });
         });
-        web_str = web_str.substring(0, web_str.length - 2);
+
     }
 });
 
@@ -90,7 +113,7 @@ client.on('message-created', message => {
                 client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide`);
                 break;
             case 'hots':
-                if (args[0].toLowerCase() === "murky"){
+                if (args[0].toLowerCase() === "murky") {
                     client.createMessage(message.channel_id, "Fuck Murky", true);
                     break;
                 }

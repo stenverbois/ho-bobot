@@ -1,0 +1,11 @@
+{
+    "versions": [
+        {
+            "version": "v0.1.0",
+            "date": "20-6-2016",
+            "changes": [
+                "First official version!"
+            ]
+        }
+    ]
+}

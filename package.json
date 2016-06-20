@@ -5,6 +5,7 @@
   "main": "bot.js",
   "dependencies": {
     "foreman": "1.4.1",
+    "semver": "5.1.0",
     "superagent": "^2.0.0",
     "ws": "1.1.0"
   },
