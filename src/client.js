@@ -168,11 +168,12 @@ class Client extends EventEmitter {
                 let channels = new Collection();
                 msg_data.channels.forEach(channel => {
                     channel.guild_id = msg_data.id;
-                    channels.add(new Channel(channel, this));
+                    channel = new Channel(channel, this);
+                    channels.add(channel);
+                    this.channels.add(channel);
                 });
                 let server = new Guild(msg_data, guild_members, channels, this);
                 // Global list updates
-                this.channels.add(channels);
                 this.guilds.add(server);
                 this.emit('server-created', server);
                 break;
