@@ -165,10 +165,10 @@ class Client extends EventEmitter {
                 msg_data.voice_states.forEach(voice_state => {
                     guild_members.get("id", voice_state.user_id).voicestate = new VoiceState(voice_state);
                 });
-                let channels = [];
+                let channels = new Collection();
                 msg_data.channels.forEach(channel => {
                     channel.guild_id = msg_data.id;
-                    channels.push(new Channel(channel, this));
+                    channels.add(new Channel(channel, this));
                 });
                 let server = new Guild(msg_data, guild_members, channels, this);
                 // Global list updates
