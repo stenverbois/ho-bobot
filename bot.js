@@ -2,6 +2,7 @@ const http = require('http');
 const semver = require('semver');
 
 const Client = require('./src/client');
+const commands = require('./commands');
 const Changelog = require('./CHANGELOG');
 
 let web_str = '';
@@ -13,30 +14,6 @@ function isUser(user, name) {
     else if (name === "Beau") { return user.username === "Void" && user.discriminator === "2721"; }
     else if (name === "Mitchell") { return user.username === "SunlightHurtsMe" && user.discriminator === "2587"; }
     // Rest of ppls
-}
-
-function msToTime(s) {
-  let ms = s % 1000;
-  s = (s - ms) / 1000;
-  let secs = s % 60;
-  s = (s - secs) / 60;
-  let mins = s % 60;
-  s = (s - mins) / 60;
-  let hrs = s % 24;
-  let days = (s - hrs) / 24;
-
-  let time_str = `${secs} seconds.`;
-  if (mins) {
-      time_str = `${mins} minutes and ` + time_str;
-  }
-  if (hrs) {
-      time_str = `${hrs} hours ` + time_str;
-  }
-  if (days) {
-      time_str = `${days} days ` + time_str;
-  }
-
-  return time_str;
 }
 
 function versionToPatchNotes(version) {
@@ -102,25 +79,7 @@ client.on('message-created', message => {
             client.createMessage(message.channel_id, `Arno used '${command}', it's not very effective...`);
             return;
         }
-        switch (command) {
-            case 'uptime':
-                client.createMessage(message.channel_id, `I have been ruling this server for ${msToTime(client.uptime())}`);
-                break;
-            case 'heroesfire':
-                client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${args.join('-')}`);
-                break;
-            case 'icyveins':
-                client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide`);
-                break;
-            case 'hots':
-                if (args[0].toLowerCase() === "murky") {
-                    client.createMessage(message.channel_id, "Fuck Murky", true);
-                    break;
-                }
-                client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide \n`);
-                client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${args.join('-')}`);
-                break;
-        }
+        commands[command].process(client, message, args);
     }
 });
 
