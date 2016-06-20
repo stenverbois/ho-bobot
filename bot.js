@@ -75,7 +75,7 @@ client.on('message-created', message => {
         let split_string = message.content.split(' ');
         let command = split_string[0].substring(1);
         let args = split_string.slice(1);
-        if (isUser(message.author, "Arno")) {
+        if (isUser(message.author, "Arno") && Math.random() * 100 > 33) {
             client.createMessage(message.channel_id, `Arno used '${command}', it's not very effective...`);
             return;
         }
