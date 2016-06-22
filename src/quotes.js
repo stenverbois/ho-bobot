@@ -11,7 +11,7 @@ function giveEntryQuoteFor(user){
     // Add pool of generic quotes with pool of name-specific quotes
 
     // TODO: quotes anders opslaan?
-    let quotes = [`Holy shit it's ${user.name}`, `${user.name} Makes his appearance`]
+    let quotes = [`Holy shit it's ${user.name}`, `${user.name} Makes his appearance`, `Prepare your anus, ${user.name} has arrived`]
     if (isUser(user, "Arno")) {
         quotes.push("A wild fag appeared");
     }
@@ -29,7 +29,8 @@ function giveLeavingQuoteFor(user){
     // Add pool of generic quotes with pool of name-specific quotes
 
     // TODO: quotes anders opslaan?
-    let quotes = [`Goodbye ${user.name}`, `${user.name} Will remain in our hearts`]
+    let quotes = [`Goodbye ${user.name}`, `${user.name} Will remain in our hearts`, `${user.name} out`
+    , `${user.name} is gonna go fap to gay porn`]
 
     if (isUser(user, "Arno")) {
         quotes.push("Good riddance");
