@@ -2,19 +2,11 @@ const http = require('http');
 const semver = require('semver');
 
 const Client = require('./src/client');
+const quotes = require('./src/quotes')
 const commands = require('./commands');
 const Changelog = require('./CHANGELOG');
 
 let web_str = '';
-
-function isUser(user, name) {
-    if (name === "Arno") { return user.username === "Nintenrax" && user.discriminator === "3087"; }
-    else if (name === "Tristan") { return user.username === "tristanvandeputte" && user.discriminator === "6353"; }
-    else if (name === "Sten") { return user.username === "Mezzo" && user.discriminator === "9210"; }
-    else if (name === "Beau") { return user.username === "Void" && user.discriminator === "2721"; }
-    else if (name === "Mitchell") { return user.username === "SunlightHurtsMe" && user.discriminator === "2587"; }
-    // Rest of ppls
-}
 
 function versionToPatchNotes(version) {
     let patch_str = `**${version.version}**:
@@ -84,32 +76,15 @@ client.on('message-created', message => {
 });
 
 client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id) => {
-    // let entermessage = `${user.name} has entered the voice channel`;
-    // let leavemessage = `${user.name} has left the voice channel`;
-    let entermessage = ``;
-    let leavemessage = ``;
-    if (isUser(user, "Arno")) {
-        entermessage = "A wild fag appeared";
-        leavemessage = "Good riddance";
-    }
-    else if (isUser(user, "Tristan")) {
-        entermessage = "God has arrived";
-        leavemessage = `We weep at your departure ${user.name}`;
-    }
-    else if (isUser(user, "Sten")) {}
-    else if (isUser(user, "Beau")) {}
-    else if (isUser(user, "Mitchell")) {
-        entermessage = "RAGE INCOMING";
-    }
+    let new_is_channel = new_voicestate.channel_id !== null && new_voicestate.channel_id !== undefined;
+    let old_was_channel = old_voicestate.channel_id !== null && old_voicestate.channel_id !== undefined;
 
-    // Check if user changed channel
-    if (old_voicestate.channel_id !== new_voicestate.channel_id) {
-        if (new_voicestate.channel_id !== null && new_voicestate.channel_id !== undefined) {
-            client.createMessage(guild_id, entermessage, true);
-        }
-        if (old_voicestate.channel_id !== null && old_voicestate.channel_id !== undefined) {
-            client.createMessage(guild_id, leavemessage, true);
-        }
+    // Check if user entered/left voice chat
+    if (!old_was_channel && new_is_channel) {
+        client.createMessage(guild_id, quotes.giveEntryQuoteFor(user), true);
+    }
+    else if (old_was_channel && !new_is_channel) {
+        client.createMessage(guild_id, quotes.giveLeavingQuoteFor(user), true);
     }
 });
 
