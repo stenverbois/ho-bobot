@@ -41,4 +41,4 @@ function giveLeavingQuoteFor(user){
     return quotes[Math.floor(Math.random()*quotes.length)];
 }
 
-module.exports = {giveEntryQuoteFor,giveLeavingQuoteFor}
+module.exports = {giveEntryQuoteFor, giveLeavingQuoteFor, isUser}
