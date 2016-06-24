@@ -27,6 +27,13 @@
             "changes": [
                 "New generic quote system for voice chat updates"
             ]
+        },
+        {
+            "version": "v0.1.4",
+            "date": "24-6-2016",
+            "changes": [
+                "Instantly delete voice state update tts messages"
+            ]
         }
     ]
 }

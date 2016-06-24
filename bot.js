@@ -81,10 +81,14 @@ client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id
 
     // Check if user entered/left voice chat
     if (!old_was_channel && new_is_channel) {
-        client.createMessage(guild_id, quotes.giveEntryQuoteFor(user), true);
+        client.createMessage(guild_id, quotes.giveEntryQuoteFor(user), true).then(msg => {
+            client.deleteMessage(guild_id, msg.id);
+        });
     }
     else if (old_was_channel && !new_is_channel) {
-        client.createMessage(guild_id, quotes.giveLeavingQuoteFor(user), true);
+        client.createMessage(guild_id, quotes.giveLeavingQuoteFor(user), true).then(msg => {
+            client.deleteMessage(guild_id, msg.id);
+        });
     }
 });
 
