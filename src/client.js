@@ -14,6 +14,9 @@ const VoiceState = require('./voicestate');
 const Collection = require('./collection');
 const {EndPoints, OpCodes} = require('./api');
 
+const sodium = require('sodium').api;
+const opus = require('node-opus');
+
 module.exports =
 class Client extends EventEmitter {
     constructor() {
@@ -24,10 +27,21 @@ class Client extends EventEmitter {
         this.gateway = '';
         this.websocket = null;
         this.heartbeat =  null;
+        this.voice_heartbeat =  null;
 
         this.voice_data = {};
         this.voice_socket = null;
         this.udp = null;
+        // temp
+        this.udp_port = 0;
+        this.udp_url = "";
+        this.udp_ssrc = 0;
+        this.secret_key = null;
+        this.udp_done = false;
+        this.opus = new opus.OpusEncoder(48000, 2);
+        this.sequence = 0;
+        this.timestamp = 0;
+        this.start_time = null;
 
         this.user_agent = {
             url: 'https://github.com/stenverbois/ho-bobot',
@@ -62,6 +76,8 @@ class Client extends EventEmitter {
 
     requestGateWay() {
         let req = request('GET', 'https://discordapp.com/api/gateway');
+        req.query({ v: 4 });
+        req.query({ encoding: "json" });
         req.set('authorization', this.token);
         return req.then(res => {
             return res.body.url;
@@ -76,7 +92,6 @@ class Client extends EventEmitter {
                 "op": 2,
                 "d": {
                     "token": this.token,
-                    "v": 4,
                     "compress": true,
                     "large_threshold": 250,
                     "properties": {
@@ -124,59 +139,13 @@ class Client extends EventEmitter {
         });
     }
 
-    createVoiceWebSocket(url, token, guild_id) {
-        this.voice_socket = new ws("wss://" + url, { rejectUnauthorized: false });
-        this.voice_socket.on('open', () => {
-            // Send Voice Server Identify message (op = 0)
-            let data = {
-                op: 0,
-                d: {
-                    server_id: guild_id,
-                    user_id: this.botuser.id,
-                    session_id: this.botuser.voicestate.session_id,
-                    token
-                }
-            };
-            this.voice_socket.send(JSON.stringify(data));
-        });
-
-        this.voice_socket.on('error', (error) => {
-            console.log(`Voice WebSocket error: ${error}`);
-        });
-
-        this.voice_socket.on('close', (code, message) => {
-            console.log(`Voice WebSocket close: (${code}) ${message}`);
-        });
-
-        this.voice_socket.on('message', (packet, flags) => {
-            const msg = JSON.parse(packet);
-            console.log(msg);
-
-            switch(msg.op) {
-                // op 2 = Ready
-                // contains: ssrc, port, modes (encryption) and heartbeat_interval
-                case 2:
-                    // Only supported mode right now is xsalsa20_poly1305
-                    let modes = msg.d.modes;
-
-                    // IP Discovery
-                    // Send 70 bytes containing only the ssrc (padded with null bytes)
-                    let buff = Buffer.alloc(70);
-                    buff.writeInt32LE(msg.d.ssrc);
-                    this.udp.send(buff, msg.d.port, url);
-                    break;
-                // op 4 = Session Description
-                // contains: secret_key (for use in encryption), mode (confirmation)
-                case 4:
-                    break;
-            }
-        });
-
+    createVoiceWebSocket(url, token, guild_id, session_id) {
         dns.lookup(url, (err, address) => {
             if (err) return console.log(err);
-            console.log(address);
+            this.voice_socket = new ws("wss://" + url, { rejectUnauthorized: false });
             this.udp = udp.createSocket("udp4");
             this.udp.bind({exclusive: true});
+            this.udp_url = url;
             this.udp.on("message", msg => {
                 // let ssrc = console.log(msg.readInt32BE(0));
                 // Read NULL-terminated ip
@@ -184,8 +153,8 @@ class Client extends EventEmitter {
                 let local_port = msg.readUInt16LE(msg.length - 2);
 
                 let data = {
-                    op: 1,
-                    d: {
+                    "op": 1,
+                    "d": {
                         "protocol": "udp",
                         "data": {
                             "address": local_ip,
@@ -196,8 +165,135 @@ class Client extends EventEmitter {
                 };
                 this.voice_socket.send(JSON.stringify(data));
             });
+
+            this.voice_socket.on('open', () => {
+                // Send Voice Server Identify message (op = 0)
+                let data = {
+                    op: 0,
+                    d: {
+                        server_id: guild_id,
+                        user_id: this.botuser.id,
+                        session_id: this.botuser.voicestate.session_id,
+                        token: token
+                    }
+                };
+                this.voice_socket.send(JSON.stringify(data));
+            });
+
+            this.voice_socket.on('error', (error) => {
+                console.log(`Voice WebSocket error: ${error}`);
+            });
+
+            this.voice_socket.on('close', (code, message) => {
+                console.log(`Voice WebSocket close: (${code}) ${message}`);
+            });
+
+            this.voice_socket.on('message', (packet, flags) => {
+                const msg = JSON.parse(packet);
+                console.log(msg);
+
+                switch(msg.op) {
+                    // op 2 = Ready
+                    // contains: ssrc, port, modes (encryption) and heartbeat_interval
+                    case 2:
+                        // Only supported mode right now is xsalsa20_poly1305
+                        let modes = msg.d.modes;
+
+                        // IP Discovery
+                        // Send 70 bytes containing only the ssrc (padded with null bytes)
+                        let buff = Buffer.alloc(70);
+                        this.udp_ssrc = msg.d.ssrc;
+                        buff.writeInt32LE(this.udp_ssrc);
+                        this.udp_port = msg.d.port;
+                        this.udp.send(buff, this.udp_port, this.udp_url);
+
+                        // Heartbeat
+                        this.voice_heartbeat = setInterval(() => {
+                            this.voice_socket.send(JSON.stringify({ "op": 3, "d": null }));
+                        }, msg.d.heartbeat_interval);
+                        break;
+                    // op 4 = Session Description
+                    // contains: secret_key (for use in encryption), mode (confirmation)
+                    case 4:
+                        this.secret_key = Buffer.from(msg.d.secret_key);
+                        let data = {
+                            op: 5,
+                            d: {
+                                speaking: true,
+                                delay: 0
+                            }
+                        };
+                        console.log(data);
+                        console.log(JSON.stringify(data));
+                        this.voice_socket.send(JSON.stringify(data));
+                        let file_stream = this.streamFile(require("path").resolve(__dirname, "../audio/test.mp3"));
+                        file_stream.once("readable", () => {
+                            this.start_time = Date.now();
+                            this.sendAudio(file_stream);
+                        });
+                        break;
+                    default:
+                        console.log(msg);
+                }
+            });
+        });
+    }
+
+    streamFile(file) {
+        const rate = 48000;
+        const audio_channels = 2;
+        const format = "s16le";
+
+        const subprocess = require('child_process');
+
+        let command = "ffmpeg";
+        let options = ["-i", file, "-f", format, "-ar", rate, "-ac", audio_channels, "pipe:1"];
+        let child = subprocess.spawn(command, options, {stdio: ['pipe', 'pipe', 'ignore']});
+        child.on("error", (err) => {
+            console.log(err);
+        });
+        return child.stdout;
+    }
+
+    sendAudio(stream) {
+        // Buffer is zero filled by default
+        let done = false;
+        stream.on("end", () => {
+            done = true;
+            console.log("File is done streaming");
         });
 
+        let _sendAudio = (stream, cnt) => {
+            if(done) return;
+            let buffer = stream.read(1920 * 2);
+            let encoded = (buffer && buffer.length === 1920 * 2) ? this.opus.encode(buffer) : Buffer.from([0xF8, 0xFF, 0xFE]);
+            console.log(encoded);
+            return setTimeout(() => {
+                this.sendAudioPacket(encoded);
+                _sendAudio(stream, cnt + 1);
+            }, 20 + ((this.start_time + cnt * 20) - Date.now()));
+        };
+        _sendAudio(stream, 1);
+    }
+
+    sendAudioPacket(encoded) {
+        this.sequence = this.sequence < 0xFFFF ? this.sequence + 1 : 0;
+        this.timestamp = this.timestamp < 0xFFFFFFFF ? this.timestamp + 960 : 0;
+
+        let header = Buffer.alloc(24);
+        header[0] = 0x80;  // Type
+        header[1] = 0x78;  // Version
+        header.writeUIntBE(this.sequence, 2, 2);  // Sequence
+        header.writeUIntBE(this.timestamp, 4, 4);  // Timestamp
+        header.writeUIntBE(this.udp_ssrc, 8, 4);  // SSRC
+        let encrypted = sodium.crypto_secretbox(encoded, header, this.secret_key);
+        let packet = Buffer.alloc(12 + encrypted.length);
+        // Copy header into packet
+        header.copy(packet, 0, 0, 12);
+        // Copy encrypted into packet after header
+        encrypted.copy(packet, 12);
+
+        this.udp.send(packet, this.udp_port, this.udp_url);
     }
 
     joinVoiceChannel(channel) {
@@ -221,7 +317,7 @@ class Client extends EventEmitter {
             case 'READY':
                 this.ready_time = Date.now();
                 this.heartbeat = setInterval(() => {
-                  this.websocket.send(JSON.stringify({op: 1, d: 0}));
+                    this.websocket.send(JSON.stringify({op: 1, d: 0}));
                 }, msg_data.heartbeat_interval);
                 this.botuser = new User(msg_data.user);
                 this.emit('ready');
