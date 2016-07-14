@@ -22,7 +22,7 @@ _Changes_:\n`;
 
 let client = new Client();
 client.on('ready', () => {
-    client.setClientGame('WORLD DOMINATION');
+    // client.setClientGame('WORLD DOMINATION');
 });
 
 client.on('server-created', (server) => {
@@ -41,6 +41,7 @@ client.on('server-created', (server) => {
             });
         });
 
+        client.joinVoiceChannel(server.channels.get("name", "General"));
     }
 });
 

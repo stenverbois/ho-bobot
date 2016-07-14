@@ -1,7 +1,9 @@
-const fs = require('fs');
 const EventEmitter = require('events').EventEmitter;
+const dns = require("dns");
+const fs = require('fs');
 const request = require('superagent');
-const WebSocket = require('ws');
+const udp = require("dgram");
+const ws = require('ws');
 
 const User = require('./user');
 const Guild = require('./guild');
@@ -16,10 +18,16 @@ module.exports =
 class Client extends EventEmitter {
     constructor() {
         super();
+        this.botuser = null;
+
         this.token = '';
         this.gateway = '';
         this.websocket = null;
         this.heartbeat =  null;
+
+        this.voice_data = {};
+        this.voice_socket = null;
+        this.udp = null;
 
         this.user_agent = {
             url: 'https://github.com/stenverbois/ho-bobot',
@@ -61,14 +69,14 @@ class Client extends EventEmitter {
     }
 
     createWebSocket(url) {
-        this.websocket = new WebSocket(url);
+        this.websocket = new ws(url);
         this.websocket.on('open', () => {
             // Send Gateway Identify message (op = 2)
             let data = {
                 "op": 2,
                 "d": {
                     "token": this.token,
-                    "v": 3,
+                    "v": 4,
                     "compress": true,
                     "large_threshold": 250,
                     "properties": {
@@ -116,15 +124,106 @@ class Client extends EventEmitter {
         });
     }
 
+    createVoiceWebSocket(url, token, guild_id) {
+        this.voice_socket = new ws("wss://" + url, { rejectUnauthorized: false });
+        this.voice_socket.on('open', () => {
+            // Send Voice Server Identify message (op = 0)
+            let data = {
+                op: 0,
+                d: {
+                    server_id: guild_id,
+                    user_id: this.botuser.id,
+                    session_id: this.botuser.voicestate.session_id,
+                    token
+                }
+            };
+            this.voice_socket.send(JSON.stringify(data));
+        });
+
+        this.voice_socket.on('error', (error) => {
+            console.log(`Voice WebSocket error: ${error}`);
+        });
+
+        this.voice_socket.on('close', (code, message) => {
+            console.log(`Voice WebSocket close: (${code}) ${message}`);
+        });
+
+        this.voice_socket.on('message', (packet, flags) => {
+            const msg = JSON.parse(packet);
+            console.log(msg);
+
+            switch(msg.op) {
+                // op 2 = Ready
+                // contains: ssrc, port, modes (encryption) and heartbeat_interval
+                case 2:
+                    // Only supported mode right now is xsalsa20_poly1305
+                    let modes = msg.d.modes;
+
+                    // IP Discovery
+                    // Send 70 bytes containing only the ssrc (padded with null bytes)
+                    let buff = Buffer.alloc(70);
+                    buff.writeInt32LE(msg.d.ssrc);
+                    this.udp.send(buff, msg.d.port, url);
+                    break;
+                // op 4 = Session Description
+                // contains: secret_key (for use in encryption), mode (confirmation)
+                case 4:
+                    break;
+            }
+        });
+
+        dns.lookup(url, (err, address) => {
+            if (err) return console.log(err);
+            console.log(address);
+            this.udp = udp.createSocket("udp4");
+            this.udp.bind({exclusive: true});
+            this.udp.on("message", msg => {
+                // let ssrc = console.log(msg.readInt32BE(0));
+                // Read NULL-terminated ip
+                let local_ip = msg.toString('utf8', 4, msg.length - 3);
+                let local_port = msg.readUInt16LE(msg.length - 2);
+
+                let data = {
+                    op: 1,
+                    d: {
+                        "protocol": "udp",
+                        "data": {
+                            "address": local_ip,
+                            "port": local_port,
+                            "mode": "xsalsa20_poly1305"
+                        }
+                    }
+                };
+                this.voice_socket.send(JSON.stringify(data));
+            });
+        });
+
+    }
+
+    joinVoiceChannel(channel) {
+        if (this.websocket) {
+            let data = {
+                "op": 4,
+                "d": {
+                    "guild_id": channel.guild_id,
+                    "channel_id": channel.id,
+                    "self_mute": false,
+                    "self_deaf": false
+                }
+            };
+            this.websocket.send(JSON.stringify(data));
+        }
+    }
+
     processDispatch(msg) {
         const msg_data = msg.d;
         switch(msg.t) {
             case 'READY':
-                console.log("Ready");
                 this.ready_time = Date.now();
                 this.heartbeat = setInterval(() => {
                   this.websocket.send(JSON.stringify({op: 1, d: 0}));
                 }, msg_data.heartbeat_interval);
+                this.botuser = new User(msg_data.user);
                 this.emit('ready');
                 break;
             case 'CHANNEL_CREATE':
@@ -253,9 +352,14 @@ class Client extends EventEmitter {
                 let old_voicestate = voicestate_user.voicestate;
                 voicestate_user.voicestate = new_voicestate;
 
+                // TODO: use global cache for users
+                this.botuser = voicestate_user;
+
                 this.emit('voice-state-updated', old_voicestate, new_voicestate, voicestate_user, msg_data.guild_id);
                 break;
             case 'VOICE_SERVER_UPDATE':
+                // hack? Appended port gives "ssl unknown protocol" error
+                this.createVoiceWebSocket(msg_data.endpoint.split(":")[0], msg_data.token, msg_data.guild_id);
                 this.emit('voice-server-updated');
                 break;
             default:
