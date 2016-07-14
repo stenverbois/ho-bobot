@@ -2,7 +2,7 @@ const http = require('http');
 const semver = require('semver');
 
 const Client = require('./src/client');
-const quotes = require('./src/quotes')
+const quotes = require('./src/quotes');
 const commands = require('./commands');
 const Changelog = require('./CHANGELOG');
 
@@ -27,6 +27,7 @@ client.on('ready', () => {
 
 client.on('server-created', (server) => {
     if (server.name === 'Ho-Bokes') {
+        // Print missing changelogs to the hobobot-changelog channel
         client.getMessages(server.channels.get("name", "hobobot-changelog").id, 1).then(messages => {
             let last_patch = messages[0].content;
             let version = "";
@@ -92,8 +93,7 @@ client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id
     }
 });
 
-
-client.login(process.env.BOT_ID);
+client.login(process.env.BOT_TOKEN);
 
 // Heroku app page
 const port = process.env.PORT || 9000;
