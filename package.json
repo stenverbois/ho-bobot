@@ -8,6 +8,7 @@
     "node-opus": "0.2.1",
     "semver": "5.1.0",
     "superagent": "^2.0.0",
+    "tweetnacl": "0.14.3",
     "ws": "1.1.0"
   },
   "devDependencies": {},
