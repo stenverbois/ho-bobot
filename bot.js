@@ -1,3 +1,6 @@
+// Load .env configuration
+require('dotenv').config();
+
 const http = require('http');
 const semver = require('semver');
 
@@ -41,8 +44,8 @@ client.on('server-created', (server) => {
             });
         });
 
-        client.joinVoiceChannel(server.channels.get("name", "General"));
     }
+    client.joinVoiceChannel(server.channels.get("name", "General"));
 });
 
 client.on('presence-updated', (old_user, new_user) => {
@@ -97,7 +100,7 @@ client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id
 client.login(process.env.BOT_TOKEN);
 
 // Heroku app page
-const port = process.env.PORT || 9000;
+const port = process.env.PORT || 9001;
 
 var http_server = http.createServer((request, response) => {
     response.end(`There are no strings on me!\n\n${web_str}`);

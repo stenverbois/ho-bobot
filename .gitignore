@@ -39,6 +39,5 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
-.env-stenbot
-.env-hobobot
+.env-*
 audio/test.mp3

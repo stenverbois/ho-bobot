@@ -4,16 +4,15 @@
   "description": "",
   "main": "bot.js",
   "dependencies": {
-    "foreman": "1.4.1",
+    "dotenv": "2.0.0",
     "node-opus": "0.2.1",
     "semver": "5.1.0",
-    "sodium": "1.1.12",
     "superagent": "^2.0.0",
     "ws": "1.1.0"
   },
   "devDependencies": {},
   "scripts": {
-    "start": "nf start",
+    "start": "node bot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -14,8 +14,9 @@ const VoiceState = require('./voicestate');
 const Collection = require('./collection');
 const {EndPoints, OpCodes} = require('./api');
 
-const sodium = require('sodium').api;
+const nacl = require('tweetnacl');
 const opus = require('node-opus');
+const ytdl = require('ytdl-core');
 
 module.exports =
 class Client extends EventEmitter {
@@ -146,7 +147,7 @@ class Client extends EventEmitter {
             this.udp = udp.createSocket("udp4");
             this.udp.bind({exclusive: true});
             this.udp_url = url;
-            this.udp.on("message", msg => {
+            this.udp.once("message", msg => {
                 // let ssrc = console.log(msg.readInt32BE(0));
                 // Read NULL-terminated ip
                 let local_ip = msg.toString('utf8', 4, msg.length - 3);
@@ -190,7 +191,6 @@ class Client extends EventEmitter {
 
             this.voice_socket.on('message', (packet, flags) => {
                 const msg = JSON.parse(packet);
-                console.log(msg);
 
                 switch(msg.op) {
                     // op 2 = Ready
@@ -223,17 +223,20 @@ class Client extends EventEmitter {
                                 delay: 0
                             }
                         };
-                        console.log(data);
-                        console.log(JSON.stringify(data));
                         this.voice_socket.send(JSON.stringify(data));
-                        let file_stream = this.streamFile(require("path").resolve(__dirname, "../audio/test.mp3"));
-                        file_stream.once("readable", () => {
-                            this.start_time = Date.now();
-                            this.sendAudio(file_stream);
+                        ytdl.getInfo("Youtube link", (err, info) => {
+                            // `info` is a list of all possible formats this video exists in
+                            let audio_formats = info.formats.filter(i => i.type && i.type.indexOf('audio/') > -1);
+                            let selection = audio_formats.reduce((pv, cv) => pv.audioBitrate > cv.audioBitrate ? pv : cv);
+                            let file_stream = this.streamFile(selection.url);
+                            file_stream.once("readable", () => {
+                                this.start_time = Date.now();
+                                this.sendAudio(file_stream);
+                            });
                         });
                         break;
                     default:
-                        console.log(msg);
+                        console.log(`Unknown opcode ${msg.op}: `, msg);
                 }
             });
         });
@@ -267,7 +270,6 @@ class Client extends EventEmitter {
             if(done) return;
             let buffer = stream.read(1920 * 2);
             let encoded = (buffer && buffer.length === 1920 * 2) ? this.opus.encode(buffer) : Buffer.from([0xF8, 0xFF, 0xFE]);
-            console.log(encoded);
             return setTimeout(() => {
                 this.sendAudioPacket(encoded);
                 _sendAudio(stream, cnt + 1);
@@ -286,12 +288,12 @@ class Client extends EventEmitter {
         header.writeUIntBE(this.sequence, 2, 2);  // Sequence
         header.writeUIntBE(this.timestamp, 4, 4);  // Timestamp
         header.writeUIntBE(this.udp_ssrc, 8, 4);  // SSRC
-        let encrypted = sodium.crypto_secretbox(encoded, header, this.secret_key);
+        let encrypted = nacl.secretbox(encoded, header, this.secret_key);
         let packet = Buffer.alloc(12 + encrypted.length);
         // Copy header into packet
         header.copy(packet, 0, 0, 12);
         // Copy encrypted into packet after header
-        encrypted.copy(packet, 12);
+        for (let i = 0; i < encrypted.length; i++) packet[i + 12] = encrypted[i];
 
         this.udp.send(packet, this.udp_port, this.udp_url);
     }
