@@ -1,5 +1,5 @@
 // Load .env configuration
-require('dotenv').config();
+// require('dotenv').config();
 
 const http = require('http');
 const semver = require('semver');
