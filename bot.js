@@ -1,3 +1,6 @@
+// Load .env configuration
+require('dotenv').config();
+
 const http = require('http');
 const semver = require('semver');
 
@@ -22,7 +25,7 @@ _Changes_:\n`;
 
 let client = new Client();
 client.on('ready', () => {
-    client.setClientGame('WORLD DOMINATION');
+    // client.setClientGame('WORLD DOMINATION');
 });
 
 client.on('server-created', (server) => {
@@ -42,6 +45,7 @@ client.on('server-created', (server) => {
         });
 
     }
+    client.joinVoiceChannel(server.channels.get("name", "General"));
 });
 
 client.on('presence-updated', (old_user, new_user) => {
@@ -66,13 +70,35 @@ client.on('message-created', message => {
     // Start of a command
     if (message.content[0] === '!') {
         let split_string = message.content.split(' ');
-        let command = split_string[0].substring(1);
+        let command_str = split_string[0].substring(1);
         let args = split_string.slice(1);
-        if (quotes.isUser(message.author, "Arno") && Math.random() * 100 > 33) {
-            client.createMessage(message.channel_id, `Arno used '${command}', it's not very effective...`);
+        let command = commands[command_str];
+
+        // Return if command doesn't exist
+        if (!command) {
+            client.createMessage(message.channel_id, `\`${command_str}\`is not a valid command, ${message.author.name}. Check \`!commands\` for a list of existing commands.`);
             return;
         }
-        commands[command].process(client, message, args);
+
+        // Deny Arno
+        if (quotes.isUser(message.author, "Arno") && Math.random() > 0.9) {
+            client.createMessage(message.channel_id, `Arno used '${command_str}', it's not very effective...`);
+            return;
+        }
+
+        // Arguments check
+        let number_required = command.args.map(arg => arg.optional && arg.optional === true ? 0 : 1).reduce((a, b) => a + b, 0);
+        if (number_required > args.length) {
+            client.createMessage(message.channel_id, `You fool, this command requires more arguments.`);
+            return;
+        }
+
+        command.process(client, message, args).catch(err => {
+            if (process.env.NODE_ENV === "development") {
+                console.error(err);
+            }
+            client.createMessage(message.channel_id, "Oops, something went wrong while executing your command. ¯\\_(ツ)_/¯\n");
+        });
     }
 });
 
@@ -82,13 +108,13 @@ client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id
 
     // Check if user entered/left voice chat
     if (!old_was_channel && new_is_channel) {
-        client.createMessage(guild_id, quotes.giveEntryQuoteFor(user), true).then(msg => {
-            client.deleteMessage(guild_id, msg.id);
+        client.createMessage(guild_id, quotes.giveEntryQuoteFor(user), true).then(message => {
+            message.delete();
         });
     }
     else if (old_was_channel && !new_is_channel) {
-        client.createMessage(guild_id, quotes.giveLeavingQuoteFor(user), true).then(msg => {
-            client.deleteMessage(guild_id, msg.id);
+        client.createMessage(guild_id, quotes.giveLeavingQuoteFor(user), true).then(message => {
+            message.delete();
         });
     }
 });
@@ -96,12 +122,12 @@ client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id
 client.login(process.env.BOT_TOKEN);
 
 // Heroku app page
-const port = process.env.PORT || 9000;
+const port = process.env.PORT || 9001;
 
 var http_server = http.createServer((request, response) => {
     response.end(`There are no strings on me!\n\n${web_str}`);
 });
 
 http_server.listen(port, () => {
-    console.log('Server listening on: http://localhost:%s', port);
+    console.log('Server listening on: 0.0.0.0:%s', port);
 });

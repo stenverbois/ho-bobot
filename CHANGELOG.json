@@ -34,6 +34,14 @@
             "changes": [
                 "Instantly delete voice state update tts messages"
             ]
+        },
+        {
+            "version": "v0.2.0",
+            "date": "06-09-2016",
+            "changes": [
+                "Basic music playback controls (youtube only at the moment)",
+                "More retard proof command system"
+            ]
         }
     ]
 }

@@ -1,7 +1,9 @@
-const fs = require('fs');
 const EventEmitter = require('events').EventEmitter;
+const dns = require("dns");
+const fs = require('fs');
 const request = require('superagent');
-const WebSocket = require('ws');
+const udp = require("dgram");
+const ws = require('ws');
 
 const User = require('./user');
 const Guild = require('./guild');
@@ -11,15 +13,19 @@ const Channel = require('./channel');
 const VoiceState = require('./voicestate');
 const Collection = require('./collection');
 const {EndPoints, OpCodes} = require('./api');
+const VoiceConnection = require('./voice/voiceConnection');
 
 module.exports =
 class Client extends EventEmitter {
     constructor() {
         super();
+        this.botuser = undefined;
+
         this.token = '';
         this.gateway = '';
-        this.websocket = null;
-        this.heartbeat =  null;
+        this.websocket = undefined;
+        this.heartbeat =  undefined;
+        this.voice_heartbeat =  undefined;
 
         this.user_agent = {
             url: 'https://github.com/stenverbois/ho-bobot',
@@ -29,6 +35,8 @@ class Client extends EventEmitter {
         // TEMP
         this.guilds = new Collection();
         this.channels = new Collection();
+
+        this.voice_connection = undefined;
     }
 
     login(token) {
@@ -54,6 +62,8 @@ class Client extends EventEmitter {
 
     requestGateWay() {
         let req = request('GET', 'https://discordapp.com/api/gateway');
+        req.query({ v: 4 });
+        req.query({ encoding: "json" });
         req.set('authorization', this.token);
         return req.then(res => {
             return res.body.url;
@@ -61,14 +71,13 @@ class Client extends EventEmitter {
     }
 
     createWebSocket(url) {
-        this.websocket = new WebSocket(url);
+        this.websocket = new ws(url);
         this.websocket.on('open', () => {
             // Send Gateway Identify message (op = 2)
             let data = {
                 "op": 2,
                 "d": {
                     "token": this.token,
-                    "v": 3,
                     "compress": true,
                     "large_threshold": 250,
                     "properties": {
@@ -116,15 +125,30 @@ class Client extends EventEmitter {
         });
     }
 
+    joinVoiceChannel(channel) {
+        if (this.websocket) {
+            let data = {
+                "op": 4,
+                "d": {
+                    "guild_id": channel.guild_id,
+                    "channel_id": channel.id,
+                    "self_mute": false,
+                    "self_deaf": false
+                }
+            };
+            this.websocket.send(JSON.stringify(data));
+        }
+    }
+
     processDispatch(msg) {
         const msg_data = msg.d;
         switch(msg.t) {
             case 'READY':
-                console.log("Ready");
                 this.ready_time = Date.now();
                 this.heartbeat = setInterval(() => {
-                  this.websocket.send(JSON.stringify({op: 1, d: 0}));
+                    this.websocket.send(JSON.stringify({op: 1, d: 0}));
                 }, msg_data.heartbeat_interval);
+                this.botuser = new User(msg_data.user);
                 this.emit('ready');
                 break;
             case 'CHANNEL_CREATE':
@@ -216,13 +240,7 @@ class Client extends EventEmitter {
                 this.emit('server-role-deleted');
                 break;
             case 'MESSAGE_CREATE':
-                let mentions = new Collection();
-                let channel_with_message = this.channels.get("id", msg_data.channel_id);
-                let guild_with_message = this.guilds.get("id", channel_with_message.guild_id);
-                msg_data.mentions.forEach(mention => {
-                    mentions.add(guild_with_message.get("id", mention.id));
-                });
-                let message = new Message(msg_data, guild_with_message.members.get("id", msg_data.author.id), mentions);
+                let message = new Message(msg_data, this);
                 this.emit('message-created', message);
                 break;
             case 'MESSAGE_UPDATE':
@@ -253,9 +271,14 @@ class Client extends EventEmitter {
                 let old_voicestate = voicestate_user.voicestate;
                 voicestate_user.voicestate = new_voicestate;
 
+                // TODO: use global cache for users
+                this.botuser = voicestate_user;
+
                 this.emit('voice-state-updated', old_voicestate, new_voicestate, voicestate_user, msg_data.guild_id);
                 break;
             case 'VOICE_SERVER_UPDATE':
+                // hack? Appended port gives "ssl unknown protocol" error
+                this.voice_connection = new VoiceConnection(this, msg_data.endpoint.split(":")[0], msg_data.token, msg_data.guild_id);
                 this.emit('voice-server-updated');
                 break;
             default:
@@ -271,26 +294,28 @@ class Client extends EventEmitter {
 
         return req.then(result => {
                 return result.body;
-            }, error => {
-                console.log(`API request to ${endpoint} (${method}) failed. Logs are in 'failed_api.log' (development only).`);
-                if(process.env.NODE_ENV === "development") {
+            }).catch(error => {
+                if (process.env.NODE_ENV === "development") {
                     fs.appendFileSync(`failed_api.log`, JSON.stringify(error, null, 2));
                 }
+                return Promise.reject(`API request to ${endpoint} (${method}) failed. Logs are in 'failed_api.log' (development only).`);
             });
     }
 
-    createMessage(channel_id, message, tts=false) {
-        let data = {
-            'content': message,
-            'tts': tts
-        };
-        if (data.content) {
-            return this.apiRequest('POST', EndPoints.CHANNEL_MESSAGE(channel_id), data);
-        }
+    createMessage(channel_id, content="", tts=false) {
+        let data = { content, tts };
+        return this.apiRequest('POST', EndPoints.CHANNEL_MESSAGE(channel_id), data).then(msg => {
+            return new Message(msg, this);
+        });
     }
 
-    deleteMessage(channel_id, message_id) {
-        return this.apiRequest('DELETE', EndPoints.CHANNEL_MESSAGE_EDIT(channel_id, message_id));
+    editMessage(message, content="") {
+        let data = { content };
+        return this.apiRequest('PATCH', EndPoints.CHANNEL_MESSAGE_EDIT(message.channel_id, message.id), data);
+    }
+
+    deleteMessage(message) {
+        return this.apiRequest('DELETE', EndPoints.CHANNEL_MESSAGE_EDIT(message.channel_id, message.id));
     }
 
     getMessages(channel_id, limit=50) {

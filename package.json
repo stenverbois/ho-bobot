@@ -4,10 +4,14 @@
   "description": "",
   "main": "bot.js",
   "dependencies": {
+    "dotenv": "2.0.0",
     "foreman": "1.4.1",
+    "node-opus": "0.2.1",
     "semver": "5.1.0",
     "superagent": "^2.0.0",
-    "ws": "1.1.0"
+    "tweetnacl": "0.14.3",
+    "ws": "1.1.0",
+    "ytdl-core": "0.7.17"
   },
   "devDependencies": {},
   "scripts": {
