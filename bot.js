@@ -72,11 +72,17 @@ client.on('message-created', message => {
         let split_string = message.content.split(' ');
         let command = split_string[0].substring(1);
         let args = split_string.slice(1);
-        if (quotes.isUser(message.author, "Arno") && Math.random() * 100 > 33) {
+        if (quotes.isUser(message.author, "Arno") && Math.random() > 0.9) {
             client.createMessage(message.channel_id, `Arno used '${command}', it's not very effective...`);
             return;
         }
-        commands[command].process(client, message, args);
+        console.log(message);
+        if (commands[command]) {
+            commands[command].process(client, message, args);
+        }
+        else {
+            client.createMessage(message.channel_id, `\`${command}\`is not a valid command, ${message.author.name}. Check \`!commands\` for a list of existing commands.`);
+        }
     }
 });
 
@@ -107,5 +113,5 @@ var http_server = http.createServer((request, response) => {
 });
 
 http_server.listen(port, () => {
-    console.log('Server listening on: http://localhost:%s', port);
+    console.log('Server listening on: 0.0.0.0:%s', port);
 });
