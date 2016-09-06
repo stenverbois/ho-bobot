@@ -70,21 +70,35 @@ client.on('message-created', message => {
     // Start of a command
     if (message.content[0] === '!') {
         let split_string = message.content.split(' ');
-        let command = split_string[0].substring(1);
+        let command_str = split_string[0].substring(1);
         let args = split_string.slice(1);
-        if (quotes.isUser(message.author, "Arno") && Math.random() > 0.9) {
-            client.createMessage(message.channel_id, `Arno used '${command}', it's not very effective...`);
+        let command = commands[command_str];
+
+        // Return if command doesn't exist
+        if (!command) {
+            client.createMessage(message.channel_id, `\`${command_str}\`is not a valid command, ${message.author.name}. Check \`!commands\` for a list of existing commands.`);
             return;
         }
 
-        if (commands[command]) {
-            commands[command].process(client, message, args).catch(err => {
-                client.createMessage(message.channel_id, "Oops, something went wrong while executing your command. ¯\\_(ツ)_/¯\n");
-            });
+        // Deny Arno
+        if (quotes.isUser(message.author, "Arno") && Math.random() > 0.9) {
+            client.createMessage(message.channel_id, `Arno used '${command_str}', it's not very effective...`);
+            return;
         }
-        else {
-            client.createMessage(message.channel_id, `\`${command}\`is not a valid command, ${message.author.name}. Check \`!commands\` for a list of existing commands.`);
+
+        // Arguments check
+        let number_required = command.args.map(arg => arg.optional && arg.optional === true ? 0 : 1).reduce((a, b) => a + b, 0);
+        if (number_required > args.length) {
+            client.createMessage(message.channel_id, `You fool, this command requires more arguments.`);
+            return;
         }
+
+        command.process(client, message, args).catch(err => {
+            if (process.env.NODE_ENV === "development") {
+                console.error(err);
+            }
+            client.createMessage(message.channel_id, "Oops, something went wrong while executing your command. ¯\\_(ツ)_/¯\n");
+        });
     }
 });
 
@@ -94,13 +108,13 @@ client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id
 
     // Check if user entered/left voice chat
     if (!old_was_channel && new_is_channel) {
-        client.createMessage(guild_id, quotes.giveEntryQuoteFor(user), true).then(msg => {
-            msg.delete();
+        client.createMessage(guild_id, quotes.giveEntryQuoteFor(user), true).then(message => {
+            message.delete();
         });
     }
     else if (old_was_channel && !new_is_channel) {
-        client.createMessage(guild_id, quotes.giveLeavingQuoteFor(user), true).then(msg => {
-            msg.delete();
+        client.createMessage(guild_id, quotes.giveLeavingQuoteFor(user), true).then(message => {
+            message.delete();
         });
     }
 });

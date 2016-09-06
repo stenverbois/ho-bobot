@@ -295,7 +295,7 @@ class Client extends EventEmitter {
         return req.then(result => {
                 return result.body;
             }).catch(error => {
-                if(process.env.NODE_ENV === "development") {
+                if (process.env.NODE_ENV === "development") {
                     fs.appendFileSync(`failed_api.log`, JSON.stringify(error, null, 2));
                 }
                 return Promise.reject(`API request to ${endpoint} (${method}) failed. Logs are in 'failed_api.log' (development only).`);
