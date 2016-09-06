@@ -240,13 +240,7 @@ class Client extends EventEmitter {
                 this.emit('server-role-deleted');
                 break;
             case 'MESSAGE_CREATE':
-                let mentions = new Collection();
-                let channel_with_message = this.channels.get("id", msg_data.channel_id);
-                let guild_with_message = this.guilds.get("id", channel_with_message.guild_id);
-                msg_data.mentions.forEach(mention => {
-                    mentions.add(guild_with_message.get("id", mention.id));
-                });
-                let message = new Message(msg_data, guild_with_message.members.get("id", msg_data.author.id), mentions);
+                let message = new Message(msg_data, this);
                 this.emit('message-created', message);
                 break;
             case 'MESSAGE_UPDATE':
@@ -300,26 +294,28 @@ class Client extends EventEmitter {
 
         return req.then(result => {
                 return result.body;
-            }, error => {
-                console.log(`API request to ${endpoint} (${method}) failed. Logs are in 'failed_api.log' (development only).`);
+            }).catch(error => {
                 if(process.env.NODE_ENV === "development") {
                     fs.appendFileSync(`failed_api.log`, JSON.stringify(error, null, 2));
                 }
+                return Promise.reject(`API request to ${endpoint} (${method}) failed. Logs are in 'failed_api.log' (development only).`);
             });
     }
 
-    createMessage(channel_id, message, tts=false) {
-        let data = {
-            'content': message,
-            'tts': tts
-        };
-        if (data.content) {
-            return this.apiRequest('POST', EndPoints.CHANNEL_MESSAGE(channel_id), data);
-        }
+    createMessage(channel_id, content="", tts=false) {
+        let data = { content, tts };
+        return this.apiRequest('POST', EndPoints.CHANNEL_MESSAGE(channel_id), data).then(msg => {
+            return new Message(msg, this);
+        });
     }
 
-    deleteMessage(channel_id, message_id) {
-        return this.apiRequest('DELETE', EndPoints.CHANNEL_MESSAGE_EDIT(channel_id, message_id));
+    editMessage(message, content="") {
+        let data = { content };
+        return this.apiRequest('PATCH', EndPoints.CHANNEL_MESSAGE_EDIT(message.channel_id, message.id), data);
+    }
+
+    deleteMessage(message) {
+        return this.apiRequest('DELETE', EndPoints.CHANNEL_MESSAGE_EDIT(message.channel_id, message.id));
     }
 
     getMessages(channel_id, limit=50) {

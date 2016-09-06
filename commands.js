@@ -28,7 +28,7 @@ module.exports = {
     "uptime": {
         doc: "How much time I have been online for",
         process: (client, message) => {
-            client.createMessage(message.channel_id, `I have been ruling this server for ${msToTime(client.uptime())}`);
+            return client.createMessage(message.channel_id, `I have been ruling this server for ${msToTime(client.uptime())}`);
         }
     },
     "commands": {
@@ -39,57 +39,68 @@ module.exports = {
                 let c = module.exports[command];
                 commands_str += `**!${command}** ${c.args ? c.args : ""}\n  _${c.doc}_\n`;
             }
-            client.createMessage(message.channel_id, commands_str);
+            return client.createMessage(message.channel_id, commands_str);
         }
     },
     "music": {
         args: "<Youtube link>",
         doc: "Play a song",
         process: (client, message, args) => {
-            switch(args[0]) {
-                case "play":
-                    ytdl.getInfo(args[1], (err, info) => {
-                        if (err) {
-                            console.error("Error in !music:", err);
-                        }
-                        // `info` is a list of all possible formats this video exists in
-                        let audio_formats = info.formats.filter(i => i.type && i.type.indexOf('audio/') > -1);
-                        let selection = audio_formats.reduce((pv, cv) => pv.audioBitrate > cv.audioBitrate ? pv : cv);
-                        client.voice_connection.play(selection.url);
-                    });
-                    break;
-                case "stop":
-                    client.voice_connection.stop();
-                    break;
-                case "pause":
-                    break;
-            }
+            return new Promise((resolve, reject) => {
+                switch(args[0]) {
+                    case "play":
+                        ytdl.getInfo(args[1], (err, info) => {
+                            if (err) {
+                                console.error("Error in !music:", err);
+                            }
+                            // `info` is a list of all possible formats this video exists in
+                            let audio_formats = info.formats.filter(i => i.type && i.type.indexOf('audio/') > -1);
+                            let selection = audio_formats.reduce((pv, cv) => pv.audioBitrate > cv.audioBitrate ? pv : cv);
+                            client.voice_connection.play(selection.url);
+                        });
+                        break;
+                    case "stop":
+                        client.voice_connection.stop();
+                        break;
+                    case "pause":
+                        break;
+                }
+                resolve();
+            });
         }
     },
     "hots": {
         args: "<hero>",
         doc: "View HotS build for <hero> on icy-veins.com and heroesfire.com",
         process: (client, message, args) => {
-            if (args[0].toLowerCase() === "murky") {
-                client.createMessage(message.channel_id, "Fuck Murky", true);
-                return;
-            }
-            client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide \n`);
-            client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${args.join('-')}`);
+            return new Promise((resolve, reject) => {
+                if (args[0].toLowerCase() === "murky") {
+                    client.createMessage(message.channel_id, "Fuck Murky", true);
+                    return;
+                }
+                let m1 = client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide \n`);
+                let m2 = client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${args.join('-')}`);
+                return Promise.all([m1, m2]);
+            });
         }
     },
     "heroesfire": {
         args: "<hero>",
         doc: "View HotS build for <hero> on heroesfire.com",
         process: (client, message, args) => {
-            client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${args.join('-')}`);
+            return client.createMessage(message.channel_id, `http://www.heroesfire.com/hots/wiki/heroes/${args.join('-')}`);
         }
     },
     "icyveins": {
         args: "<hero>",
         doc: "View HotS build for <hero> on icy-veins.com",
         process: (client, message, args) => {
-            client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide`);
+            return client.createMessage(message.channel_id, `http://www.icy-veins.com/heroes/${args.join('-')}-build-guide`);
+        }
+    },
+    "test": {
+        process: (client, message) => {
+            return client.createMessage(message.channel_id);
         }
     }
 };

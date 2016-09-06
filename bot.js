@@ -76,9 +76,11 @@ client.on('message-created', message => {
             client.createMessage(message.channel_id, `Arno used '${command}', it's not very effective...`);
             return;
         }
-        console.log(message);
+
         if (commands[command]) {
-            commands[command].process(client, message, args);
+            commands[command].process(client, message, args).catch(err => {
+                client.createMessage(message.channel_id, "Oops, something went wrong while executing your command. ¯\\_(ツ)_/¯\n");
+            });
         }
         else {
             client.createMessage(message.channel_id, `\`${command}\`is not a valid command, ${message.author.name}. Check \`!commands\` for a list of existing commands.`);
@@ -93,12 +95,12 @@ client.on('voice-state-updated', (old_voicestate, new_voicestate, user, guild_id
     // Check if user entered/left voice chat
     if (!old_was_channel && new_is_channel) {
         client.createMessage(guild_id, quotes.giveEntryQuoteFor(user), true).then(msg => {
-            client.deleteMessage(guild_id, msg.id);
+            msg.delete();
         });
     }
     else if (old_was_channel && !new_is_channel) {
         client.createMessage(guild_id, quotes.giveLeavingQuoteFor(user), true).then(msg => {
-            client.deleteMessage(guild_id, msg.id);
+            msg.delete();
         });
     }
 });
