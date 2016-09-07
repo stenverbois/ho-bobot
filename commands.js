@@ -49,7 +49,6 @@ let command_data = {
             { type: "subcommand", oneof: [
                 { name: "play", args: [ { name: "Youtube link" } ] },
                 { name: "stop" },
-                { name: "pause" }
             ]},
         ],
         doc: "Music controls",
